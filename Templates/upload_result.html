@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .info-container {
+            display: grid;
+            grid-template-columns: repeat(2, auto);
+        }
+    </style>
+</head>
+<body>
+    <p>{{ message }}</p>
+    {% if not files %}
+        <p></p>
+    {% else %}
+    <div class="info-container">
+        {% for file in files %}
+        <div class="file-info">
+            <p><strong>ID:</strong> {{ file.id }}</p>
+            <p><strong>Name:</strong> {{ file.name }}</p>
+            <p><strong>Type:</strong> {{ file.mimeType }}</p>
+            <p><strong>Size: </strong> {{ file.size }} Bytes</p>
+            <p><strong>Uploaded At:</strong> {{ file.createdTime }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% endif %}
+</body>
+</html>
