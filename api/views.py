@@ -3,13 +3,15 @@ from django.db.models import Q
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from rest_framework import status, generics
 from .models import Article, Video, ArticleComment, VideoComment, SearchHistory
 from .serializer import ArticleSerializer, VideoSerializer, ArticleCommentSerializer, VideoCommentSerializer, SearchHistorySerializer
-from .utils import upload_file, list_all_files, get_specific_file, service
+from .utils import upload_file, list_all_files, get_specific_file, delete_specific_file
 from .forms import FileUploadForm
 import os
 import googleapiclient.errors as GoogleErrors
+import time
 
 # Create your views here.
 class ArticleListCreate(generics.ListCreateAPIView):
@@ -53,6 +55,15 @@ class ArticleList(APIView):
 
         serializer = ArticleSerializer(articles, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, pk, format=None):
+        try:
+            video = Video.objects.get(pk=pk)
+            id = video.videoUniqueId
+            video.delete()
+            
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
     
 class VideoListCreate(generics.ListCreateAPIView):
     queryset = Video.objects.all()
@@ -167,6 +178,7 @@ def get_home(request, *args, **kwargs):
 #         return JsonResponse({"message": "An error occured", "status": JsonResponse.status_code})
 
 def upload_to_google_drive(request, *args, **kwargs):
+    start = time.time()
     if request.method == "POST":
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
@@ -208,42 +220,54 @@ def upload_to_google_drive(request, *args, **kwargs):
                 else:
                     message = "File upload was not succeed."
 
-            return render(request, 'upload_result.html', {'message': message, "files": None})
+            end = time.time()
+
+            total_time = end - start
+
+            return render(request, 'upload_result.html', {'message': message, "files": None, "time_message": f"Total time: {total_time}s"})
     else:
         form = FileUploadForm()
 
     return render(request, 'upload_form.html', {'form': form})
 
 def list_files(request):
+    start = time.time()
     files = list_all_files()
 
     if not files:
         message = "No files were uploaded"
     else:
         message = "List of files: "
+    end = time.time()
 
-    return render(request, 'upload_result.html', {'message': message, "files": files})
+    total_time = end - start
+
+    return render(request, 'upload_result.html', {'message': message, "files": files, "time_message": f"Total time: {total_time}s"})
 
 def get_file(request, id):
+    start = time.time()
     file = get_specific_file(id)
 
     if not file:
         message = 'File not found'
     else:
         message = f"File {id}"
+    end = time.time()
 
-    return render(request, 'upload_result.html', {'message': message, "files": [file]})
+    total_time = end - start
+
+    return render(request, 'upload_result.html', {'message': message, "files": [file], "time_message": f"Total time: {total_time}s"})
 
 def delete_file(request, id):
-    file = get_specific_file(id)
-    if not file:
-        message = 'File not found'
-    else:
-        try:
-            service.files().delete(fileId=id).execute()
-            Video.objects.get(id=id).delete()
-            message = 'File deleted successfully'
-        except Exception as e:
-            message = f'Error deleting file {id}: {e}'
+    start = time.time()
+    try:
+        file = delete_specific_file(id)
+        Video.objects.get(videoUniqueId=id).delete()
+        message = f"File deleted successfully: {file}"
+    except Exception as e:
+        message = f'Error deleting file {id}: {e}'
+    end = time.time()
 
-    return render(request, 'upload_result.html', {'message': message, "files": None})
+    total_time = end - start
+
+    return render(request, 'upload_result.html', {'message': message, "files": None, "time_message": f"Total time: {total_time}s"})

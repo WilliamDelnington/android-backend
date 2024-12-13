@@ -2,11 +2,17 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
-import requests
+import os
+from dotenv import load_dotenv
 
+
+load_dotenv()
 def authenticate_drive():
+#   To publish the code to github, the json file path must be called
+# through the environment, or else the commit will be blocked or the key will be disabled.
   credentials = service_account.Credentials.from_service_account_file(
-    './json/testproject-444113-34cf704a735a.json')
+    os.getenv("GOOGLE_DRIVE_CREDENTIALS_JSON_FILE_PATH")
+   )
   drive_service = build('drive', 'v3', credentials=credentials)
   
   return drive_service
@@ -67,6 +73,14 @@ def get_specific_file(id):
       return response
    except HttpError as e:
       return
+   
+def delete_specific_file(id):
+   try:
+      response = service.files().delete(fileId=id).execute()
+      return response
+   except Exception as e:
+      raise HttpError(e)
+      
 
    # if not files:
    #    print(f"No files found.")
