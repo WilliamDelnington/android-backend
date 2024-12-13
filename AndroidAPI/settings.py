@@ -41,7 +41,8 @@ AUTH_USER_MODEL = "api.CustomUser"
 CORS_ALLOWED_ORIGINS = [
     # Configure the host to access the client
     "http://127.0.0.1:5500",
-    "http://192.168.56.1:5500"
+    "http://192.168.56.1:5500",
+    "https://drive.google.com"
 ]
 
 CORS_ALLOW_METHODS = [

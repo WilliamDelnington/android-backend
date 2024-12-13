@@ -1,17 +1,18 @@
 from django.shortcuts import render
 from django.db.models import Q
 from django.conf import settings
+from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from rest_framework import status, generics
-from .models import Article, Video, ArticleComment, VideoComment, SearchHistory
-from .serializer import ArticleSerializer, VideoSerializer, ArticleCommentSerializer, VideoCommentSerializer, SearchHistorySerializer
+from rest_framework.permissions import IsAdminUser
+from .models import Article, Video, ArticleComment, VideoComment, SearchHistory, CustomUser
+from .serializer import ArticleSerializer, VideoSerializer, ArticleCommentSerializer, VideoCommentSerializer, SearchHistorySerializer, UserSerializer
 from .utils import upload_file, list_all_files, get_specific_file, delete_specific_file
 from .forms import FileUploadForm
 import os
-import googleapiclient.errors as GoogleErrors
 import time
+import requests
 
 # Create your views here.
 class ArticleListCreate(generics.ListCreateAPIView):
@@ -60,7 +61,9 @@ class ArticleList(APIView):
         try:
             video = Video.objects.get(pk=pk)
             id = video.videoUniqueId
+            delete_specific_file(id)
             video.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
             
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -164,6 +167,46 @@ class SearchHistoryList(APIView):
         serializer = SearchHistorySerializer(history, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+class UserListCreate(generics.ListCreateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+
+    def delete(self, request, *args, **kwargs):
+        CustomUser.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    permission_classes = [IsAdminUser]
+    
+class UserRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    lookup_field = "pk"
+
+class UserList(APIView):
+    def get(self, request, format=None):
+        key = request.query_params.get("key", "")
+        if key:
+            user = CustomUser.objects.filter(
+                Q(userId__icontains=key) |
+                Q(username__icontains=key)
+            )
+        else:
+            user = CustomUser.objects.all()
+
+        serializer = UserSerializer(user, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request, format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = CustomUser.objects.create_user(
+                email=serializer.validated_data['email'],
+                password=request.data.get('password'),
+                username=serializer.validated_data['username']
+            )
+            return Response({'message': 'User created successfully!'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 def get_home(request, *args, **kwargs):
     return render(request, 'index.html', {})
 
@@ -199,10 +242,7 @@ def upload_to_google_drive(request, *args, **kwargs):
             except Exception as e:
                 message = f"An error occured: {e} in"
             finally:
-                
-                file = get_specific_file(file_id)
                 url = f"https://drive.google.com/file/d/{file_id}/view"
-                createdTime = file.get('createdTime')
                 os.remove(file_path)
 
                 if file_id:
@@ -271,3 +311,11 @@ def delete_file(request, id):
     total_time = end - start
 
     return render(request, 'upload_result.html', {'message': message, "files": None, "time_message": f"Total time: {total_time}s"})
+
+def fetch_file(request, id):
+    file_url = f'https://drive.google.com/uc?export=download&id={id}'
+    response = requests.get(file_url)
+    if response.status_code == 200:
+        return HttpResponse(response.content, content_type=response.headers['Content-Type'])
+    else:
+        return HttpResponse("Error fetching file", status=400)

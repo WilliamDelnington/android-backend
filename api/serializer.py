@@ -26,4 +26,8 @@ class SearchHistorySerializer(serializers.ModelSerializer):
         model = SearchHistory
         fields = '__all__'
 
-    
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = '__all__'
+        read_only_fields = ['userId']

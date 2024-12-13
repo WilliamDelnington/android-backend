@@ -60,7 +60,7 @@ class ArticleComment(models.Model):
   content = models.TextField(null=True)
   parentId = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
   articleId = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
-  user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False)
+  user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False, db_column='user')
   createdTime = models.DateTimeField(null=False, auto_now_add=True)
   likeNum = models.IntegerField(null=False, default=0)
 
@@ -69,6 +69,6 @@ class VideoComment(models.Model):
   content = models.TextField(null=True)
   parentId = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
   videoId = models.ForeignKey(Video, on_delete=models.CASCADE, null=False)
-  user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False)
+  user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False, db_column='user')
   createdTime = models.DateTimeField(null=False, auto_now_add=True)
   likeNum = models.IntegerField(null=False, default=0)

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="app">
+        <!-- <video width="400" height="280" controls>
+            <source src="http://192.168.56.1:8000/fetch/14U4EkO1C8fj8N_C6bttJeZMQZ1VzHL_X" type="video/mp4">
+        </video>
+        <div class="comment-section"></div> -->
+    </div>
+    <script>
+        const videosUrl = 'http://192.168.56.1:8000/videos'
+        const videoCommentUrl = 'http://192.168.56.1:8000/videoComments'
+        let getVideoData;
+        fetch(videosUrl).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        }).then(data => {
+            console.log(data);
+            getVideoData = data
+            getVideoData.forEach(d => createVideoElement(d))
+        }).catch(error => {
+            console.log("Error fetching", error);
+        })
+
+        function createVideoElement(jsonData) {
+            const videoContainer = document.createElement("div");
+            videoContainer.className = "video-container"
+            const containerContent = `<div class="video">`
+                + `<video width=400 height=280 controls autoplay>`
+                + `<source type="video/mp4" src="http://192.168.56.1:8000/fetch/${jsonData.videoUniqueId}">`
+                + `</video>`
+                + `</div>`
+                + `<input type="text" placeholder="Add new comment..." id="add-comment-input">`
+                + `<button onClick={addComment} class="add-comment-btn ${jsonData.videoUniqueId}">Add Comment</button>`;
+            videoContainer.innerHTML = containerContent;
+            document.querySelector(".app").appendChild(videoContainer);
+        }
+
+        async function addComment(e) {
+            const randomUsers = ["Fred", "Greg", "Lucy", "Emilie", "Max"]
+            const content = document.getElementById("add-comment-input").value
+            const button = document.querySelector(".add-comment-btn");
+            const id = [...button.classList][1]
+            const data = {
+                content: content,
+                parentId: null,
+                videoId: id
+            }
+            const response = await fetch(videoCommentUrl, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+        }
+
+        function createCommentElement(jsonData) {
+            const commentContainer = document.createElement("div");
+            return commentContainer
+        }
+    </script>
+</body>
+</html>
