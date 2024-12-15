@@ -31,3 +31,25 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = '__all__'
         read_only_fields = ['userId']
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, min_length=8)
+    confirm_password = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ["email", "username", "password", "confirm_password"]
+
+    def validate(self, data):
+        if data['password'] != data['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match.")
+        return data
+    
+    def create(self, validated_data):
+        validated_data.pop('confirm_password')  # Remove confirm_password from the data
+        user = CustomUser.objects.create_user(
+            email=validated_data['email'],
+            password=validated_data['password'],
+            username=validated_data['username']
+        )
+        return user

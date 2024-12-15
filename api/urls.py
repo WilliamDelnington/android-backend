@@ -20,6 +20,7 @@ urlpatterns = [
     path('users', views.UserListCreate.as_view(), name='create-users'),
     path('users/<int:pk>', views.UserRetrieveUpdateDestroy.as_view(), name='update-users'),
     path('users/register', views.UserList.as_view(), name='get-users'),
+    path('register', views.RegisterView.as_view(), name='register'),
     path('googleDrive/upload', views.upload_to_google_drive, name='upload-to-google-drive'),
     path('googleDrive/list', views.list_files, name="list-files-in-google-drive"),
     path('googleDrive/list/<str:id>', views.get_file, name='get-file'),

@@ -1,4 +1,6 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from .models import CustomUser
 
 class FileUploadForm(forms.Form):
     videoBrandType = forms.CharField(
@@ -23,3 +25,13 @@ class FileUploadForm(forms.Form):
         })
     )
     files = forms.FileField(required=True)
+
+class CustomUserCreationsForm(UserCreationForm):
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'username')
+
+class CustomUserChangeForm(UserChangeForm):
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'username', 'is_active', 'is_staff', 'is_superuser')

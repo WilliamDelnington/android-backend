@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.permissions import IsAdminUser
 from .models import Article, Video, ArticleComment, VideoComment, SearchHistory, CustomUser
-from .serializer import ArticleSerializer, VideoSerializer, ArticleCommentSerializer, VideoCommentSerializer, SearchHistorySerializer, UserSerializer
+from .serializer import *
 from .utils import upload_file, list_all_files, get_specific_file, delete_specific_file
 from .forms import FileUploadForm
 import os
@@ -151,10 +151,14 @@ class SearchHistoryCreate(generics.ListCreateAPIView):
         SearchHistory.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    permission_classes = [IsAdminUser]
+    
 class SearchHistoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = SearchHistory.objects.all()
     serializer_class = SearchHistorySerializer
     lookup_field = "pk"
+
+    permission_classes = [IsAdminUser]
 
 class SearchHistoryList(APIView):
     def get(self, request, format=None):
@@ -174,8 +178,6 @@ class UserListCreate(generics.ListCreateAPIView):
     def delete(self, request, *args, **kwargs):
         CustomUser.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
-    permission_classes = [IsAdminUser]
     
 class UserRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
@@ -206,6 +208,16 @@ class UserList(APIView):
             )
             return Response({'message': 'User created successfully!'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class RegisterView(generics.CreateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = RegisterSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response({"message": "User registered successfully!", "user_id": user.userId}, status=status.HTTP_201_CREATED)
     
 def get_home(request, *args, **kwargs):
     return render(request, 'index.html', {})
