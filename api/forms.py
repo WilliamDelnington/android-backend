@@ -3,13 +3,18 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser
 
 class FileUploadForm(forms.Form):
-    videoBrandType = forms.CharField(
-        max_length=30,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Video Brand Type: '
-        })
-    )
+    CHOICES = [
+        ("Samsung", "Samsung"),
+        ("Apple", "Apple"),
+        ("Nokia", "Nokia"),
+        ("Microsoft", "Microsoft"),
+        ("Google", "Google"),
+        ("Dell", "Dell"),
+        ("Asus", "Asus"),
+        ("Huawei", "Huawei"),
+        ("Xiaomi", "Xiaomi")
+    ]
+    videoBrandType = forms.ChoiceField(choices=CHOICES)
     author = forms.CharField(
         max_length=200,
         required=False,
@@ -25,6 +30,28 @@ class FileUploadForm(forms.Form):
         })
     )
     files = forms.FileField(required=True)
+
+class FileUploadFormWithUrl(forms.Form):
+    CHOICES = [
+        ("Samsung", "Samsung"),
+        ("Apple", "Apple"),
+        ("Nokia", "Nokia"),
+        ("Microsoft", "Microsoft"),
+        ("Google", "Google"),
+        ("Dell", "Dell"),
+        ("Asus", "Asus"),
+        ("Huawei", "Huawei"),
+        ("Xiaomi", "Xiaomi")
+    ]
+    videoBrandType = forms.ChoiceField(choices=CHOICES)
+    URL = forms.URLField(
+        max_length=400,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'URL'
+        })
+    )
 
 class CustomUserCreationsForm(UserCreationForm):
     class Meta:

@@ -15,6 +15,7 @@
     <script>
         const videosUrl = 'http://192.168.56.1:8000/videos'
         const videoCommentUrl = 'http://192.168.56.1:8000/videoComments'
+        const usersUrl = 'http://192.168.56.1:8000/users'
         let getVideoData;
         fetch(videosUrl).then(response => {
             if (!response.ok) {
@@ -26,10 +27,11 @@
             getVideoData = data
             getVideoData.forEach(d => createVideoElement(d))
         }).catch(error => {
-            console.log("Error fetching", error);
+            alert("Error creating comment: " + error.message)
         })
 
         function createVideoElement(jsonData) {
+            console.log(jsonData);
             const videoContainer = document.createElement("div");
             videoContainer.className = "video-container"
             const containerContent = `<div class="video">`
@@ -37,21 +39,45 @@
                 + `<source type="video/mp4" src="http://192.168.56.1:8000/fetch/${jsonData.videoUniqueId}">`
                 + `</video>`
                 + `</div>`
-                + `<input type="text" placeholder="Add new comment..." id="add-comment-input">`
-                + `<button onClick={addComment} class="add-comment-btn ${jsonData.videoUniqueId}">Add Comment</button>`;
+                + `<input type="text" placeholder="Add new comment..." id="add-comment-input" class="video-comment-section-${jsonData.videoUniqueId}">`
+                // + `<button onClick={addComment} class="add-comment-btn ${jsonData.id}">Add Comment</button>`;
             videoContainer.innerHTML = containerContent;
+            const button = document.createElement('button');
+            button.classList.add(`add-comment-btn-${jsonData.videoUniqueId}`, `${jsonData.id}`)
+            button.innerText = "Add Comment";
+            button.addEventListener('click', e => addComment(e, jsonData.videoUniqueId))
+            videoContainer.appendChild(button);
             document.querySelector(".app").appendChild(videoContainer);
+            fetch(videoCommentUrl).then(res => {
+                if (!res.ok) {
+                    videoContainer.innerHTML += "<h4>Cannot load comments</h4>"
+                    return
+                }
+                return res.json();
+            }).then(data => {
+                data.forEach(d => {
+                    createCommentElement(d, jsonData.id).then(commentElement => {
+                        videoContainer.appendChild(commentElement)
+                    }).catch(error => {
+                        console.error("Error creating comment:", error.message)
+                    })
+                })
+            }).catch(err => {
+                alert("Error creating comment: " + err.message)
+            })
         }
 
-        async function addComment(e) {
-            const randomUsers = ["Fred", "Greg", "Lucy", "Emilie", "Max"]
-            const content = document.getElementById("add-comment-input").value
-            const button = document.querySelector(".add-comment-btn");
+        async function addComment(e, videoId) {
+            e.preventDefault()
+            const randomUsers = [4, 5, 6]
+            const content = document.querySelector(`.video-comment-section-${videoId}`).value
+            const button = document.querySelector(`.add-comment-btn-${videoId}`);
             const id = [...button.classList][1]
             const data = {
                 content: content,
                 parentId: null,
-                videoId: id
+                videoId: parseInt(id),
+                user: randomUsers[Math.floor(3 * Math.random())]
             }
             const response = await fetch(videoCommentUrl, {
                 method: "POST",
@@ -60,11 +86,32 @@
                 },
                 body: JSON.stringify(data)
             })
+            const c = await response.json()
+            console.log(c)
         }
 
-        function createCommentElement(jsonData) {
-            const commentContainer = document.createElement("div");
-            return commentContainer
+        async function createCommentElement(jsonData, videoId) {
+            let username;
+            try {
+                const response = await fetch(usersUrl + `/${jsonData.user}`)
+                if (!response.ok) {
+                    throw new Error(`Error getting user. Response is not ok: ${usersUrl + `/${jsonData.user}`}`)
+                }
+                const data = await response.json()
+                username = data.username
+                
+                if (jsonData.videoId == videoId) {
+                    const commentContainer = document.createElement("div");
+                    commentContainer.className = "comment-container";
+                    commentContainer.innerHTML = `<h4 class="user-name">${username ? username : jsonData.user}</h4>`
+                    + `<p class="text">${jsonData.content}</p>`
+                    + `<h5 class="date">${jsonData.createdTime}</h5>`;
+                    return commentContainer;
+                }
+            } catch (error) {
+                alert(error.message);
+                throw error;
+            }
         }
     </script>
 </body>

@@ -9,7 +9,10 @@ from rest_framework.permissions import IsAdminUser
 from .models import Article, Video, ArticleComment, VideoComment, SearchHistory, CustomUser
 from .serializer import *
 from .utils import upload_file, list_all_files, get_specific_file, delete_specific_file
-from .forms import FileUploadForm
+from .forms import FileUploadForm, FileUploadFormWithUrl
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 import os
 import time
 import requests
@@ -234,6 +237,7 @@ def get_home(request, *args, **kwargs):
 
 def upload_to_google_drive(request, *args, **kwargs):
     start = time.time()
+    
     if request.method == "POST":
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
@@ -252,7 +256,7 @@ def upload_to_google_drive(request, *args, **kwargs):
             try:
                 file_id = upload_file(file_path, uploaded_file.name)
             except Exception as e:
-                message = f"An error occured: {e} in"
+                message = f"An error occured: {e}"
             finally:
                 url = f"https://drive.google.com/file/d/{file_id}/view"
                 os.remove(file_path)
@@ -276,11 +280,89 @@ def upload_to_google_drive(request, *args, **kwargs):
 
             total_time = end - start
 
-            return render(request, 'upload_result.html', {'message': message, "files": None, "time_message": f"Total time: {total_time}s"})
+            return render(request, 'upload_result.html', {
+                'message': message, 
+                "files": None, 
+                "time_message": f"Total time: {total_time}s"
+                })
     else:
         form = FileUploadForm()
 
-    return render(request, 'upload_form.html', {'form': form})
+    return render(request, 'upload_form.html', {
+        'form': form, 
+        'form_type': "a",
+        'data': None
+        })
+
+def upload_to_google_drive_with_url(request, *args, **kwargs):
+    start = time.time()
+    if request.method == 'POST':
+        form = FileUploadFormWithUrl(request.POST, request.FILES)
+        if form.is_valid():
+            action = request.POST.get('action')
+            message = ""
+            file_path = None
+            videoContent = None
+            if action == 'get_data':
+                url = form.cleaned_data.get("URL")
+                try:
+                    videoContent = get_video_content(url)
+                    file_path = os.path.join(settings.MEDIA_ROOT, "tempvideo.mp4")
+
+                    res = requests.get(url)
+                    with open(file_path, 'wb+') as destination:
+                        for chunk in res.iter_content(chunk_size=8192):
+                            destination.write(chunk)
+                    return render(
+                        request,
+                        'upload_form.html',
+                        {
+                            'form': form,
+                            'form_type': 'b',
+                            'data': videoContent
+                        })
+                except Exception as e:
+                    end = time.time()
+                    return render(
+                        request,
+                        'upload_result.html',
+                        {
+                            'message': "Error getting content from {url}: {e}",
+                            'files': None,
+                            'time_message': f"Total time: {end - start}s"
+                        }
+                    )
+            elif action == 'upload':
+                if not videoContent and not file_path:
+                    end = time.time()
+                    return render(
+                        request,
+                        'upload_result.html',
+                        {
+                            'message': "Data hasn't occured yet.",
+                            'files': None,
+                            'time_message': f"Total time: {end - start}s"
+                        }
+                    )
+                try:
+                    file_id = upload_file(file_path, "tempvideo.mp4")
+                except Exception as e:
+                    message = f"An error occured while uploading file: {e}"
+
+            end = time.time()
+            total_time = end - start
+            return render(request, 'upload_result.html', {
+                'message': message, 
+                "files": None,
+                "time_message": f"Total time: {total_time}s"
+                })
+    else:
+        form = FileUploadFormWithUrl()
+    return render(request, 'upload_form.html', {
+        'form': form, 
+        'form_type': "b",
+        'data': None
+        })
 
 def list_files(request):
     start = time.time()
@@ -331,3 +413,34 @@ def fetch_file(request, id):
         return HttpResponse(response.content, content_type=response.headers['Content-Type'])
     else:
         return HttpResponse("Error fetching file", status=400)
+    
+def get_video_content(url: str):
+    if url.startswith("https://www.tiktok.com"):
+        while True:
+            driver = webdriver.Chrome(service=Service("E:\ChromeDriver\chromedriver.exe"))
+
+            driver.get(url)
+
+            page_source = driver.page_source
+
+            bs = BeautifulSoup(page_source, "html.parser")
+            mainContentVideoDetail = bs.find("div", {"id": "app"}).find("div", {"id": "main-content-video_detail"})
+            divPlayerContainer = mainContentVideoDetail.find("div", {"class": "eqrezik4"})
+            tiktokWebPlayer = divPlayerContainer.find("div", {"class": "tiktok-web-player"})
+            videoTag = tiktokWebPlayer.find("video")
+            source = videoTag.find_all("source")
+            contentContainer = divPlayerContainer.find("div", {"class": "eqrezik17"})
+            author = contentContainer.find("div", {"class": "evv7pft3"}).find("span", {"class": "e17fzhrb1"}).text
+            title = contentContainer.find("h1", {"data-e2e": "browse-video-desc"}).text
+
+            if source:
+                src = source[2].get("src")
+            else:
+                src = videoTag.get("src")
+            driver.quit()
+            if src.startswith("https://www.tiktok.com/"):
+                return {
+                    "author": author,
+                    "title": title,
+                    "src": src
+                }
