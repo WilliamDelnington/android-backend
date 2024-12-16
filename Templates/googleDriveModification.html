@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../Static/googleDriveModification.css">
+    <link rel="stylesheet" href="{% static 'googleDriveModification.css' %}">
+</head>
+<body>
+    <div class="form-container">
+        <form id="upload-file-form" method="post">
+            <div class="form-group">
+                <label for="brand-type">Video For Brand:</label>
+                <input type="text" id="brand-type" name="brand-type">
+            </div>
+            <div class="form-group">
+                <label for="author">Author:</label>
+                <input type="text" id="author" name="author">
+            </div>
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title">
+            </div>
+            <div class="form-group">
+                <label for="file-upload">Upload File:</label>
+                <input type="file" id="file-upload" name="file-upload">
+            </div>
+            <button type="submit" id="upload-file-button">Upload File</button>
+        </form>
+    </div>
+    
+    <script async defer src="https://apis.google.com/js/api.js"></script>
+    <script src="../Static/googleDriveModification.js" type="module"></script>
+    <script src="{% static 'googleDriveModification.js' %}"></script>
+</body>
+</html>

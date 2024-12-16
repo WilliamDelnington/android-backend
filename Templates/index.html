@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Storage</title>
+    <!-- This is required if django is used to load the website -->
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <!-- If it's not required, then use the following line -->
+    <link rel="stylesheet" href="../Static/styles.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Data Storage Form</h1>
+        <form id="dataForm" method="post">
+            <div class="form-group">
+                <label for="Id">Article Id</label>
+                <input type="text" id="id" name="id" required>
+            </div>
+            <div class="form-group">
+                <label for="brandType">Article About</label>
+                <input type="text" id="brandType" name="brandType" required>
+            </div>
+            <div class="form-group">
+                <label for="sourceName">Source Name</label>
+                <input type="text" id="sourceName" name="sourceName">
+            </div>
+            <div class="form-group">
+                <label for="author">Author</label>
+                <input type="text" id="author" name="author">
+            </div>
+            <div class="form-group">
+                <label for="title">Title</label>
+                <textarea id="title" name="title" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="url">URL</label>
+                <input type="url" id="url" name="url">
+            </div>
+            <div class="form-group">
+                <label for="urlToImage">URL to Image</label>
+                <input type="url" id="urlToImage" name="urlToImage">
+            </div>
+            <div class="form-group">
+                <label for="publishedAt">Time Published</label>
+                <input type="datetime-local" id="publishedAt" name="publishedAt" required>
+            </div>
+            <div class="form-group">
+                <label for="content">Content</label>
+                <textarea id="content" name="content" rows="5"></textarea>
+            </div>
+            <button type="submit">Save Data</button>
+            <button type="button" id="viewSavedFormsBtn">Saved form</button>
+        </form>
+    </div>
+    <div class="data-list" id="dataList" style="display: none;"></div>
+    <script src="{% static 'script.js' %}"></script>
+    <script src="../Static/script.js"></script>
+</body>
+</html>
