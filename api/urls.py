@@ -22,6 +22,7 @@ urlpatterns = [
     path('users/register', views.UserList.as_view(), name='get-users'),
     path('register', views.RegisterView.as_view(), name='register'),
     path('googleDrive/upload', views.upload_to_google_drive, name='upload-to-google-drive'),
+    path('googleDrive/uploadUrlOnlyForm', views.upload_to_google_drive_with_url, name='upload-to-google-drive-with-url'),
     path('googleDrive/list', views.list_files, name="list-files-in-google-drive"),
     path('googleDrive/list/<str:id>', views.get_file, name='get-file'),
     path('googleDrive/delete/<str:id>', views.delete_file, name='delete-file'),
