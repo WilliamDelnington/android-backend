@@ -10,12 +10,23 @@ from .models import Article, Video, ArticleComment, VideoComment, SearchHistory,
 from .serializer import *
 from .utils import upload_file, list_all_files, get_specific_file, delete_specific_file
 from .forms import FileUploadForm, FileUploadFormWithUrl
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+# from selenium.common.exceptions import WebDriverException
+# from TikTokApi import TikTokApi
+# from pytube import YouTube
 import os
 import time
 import requests
+import pyktok as pyk
+import yt_dlp
+import json
+import shutil
+import pandas as pd
 
 # Create your views here.
 class ArticleListCreate(generics.ListCreateAPIView):
@@ -151,33 +162,35 @@ class VideoList(APIView):
 
         if origin_keyword and content_keyword:
             # Get all the objects that contain both keywords.
-            articles = Video.objects.filter(
+            video = Video.objects.filter(
                 (Q(videoBrandType__icontains=origin_keyword) |
                 Q(author__icontains=origin_keyword)) & 
                 (Q(title__icontains=content_keyword))
             )
         elif origin_keyword:
             # Get all the video objects which author or brand type contains the keyword,.
-            articles = Video.objects.filter(
+            video = Video.objects.filter(
                 Q(videoBrandType__icontains=origin_keyword) |
                 Q(author__icontains=origin_keyword)
             )
         elif content_keyword:
-            # Get all the objects that contain key.
-            articles = Video.objects.filter(
+            # Get all the video objects which 
+            video = Video.objects.filter(
                 title__icontains=content_keyword
             )
         else:
             # If no filter are used, return all video objects.
-            articles = Video.objects.all()
+            video = Video.objects.all()
 
-        serializer = VideoSerializer(articles, many=True)
+        serializer = VideoSerializer(video, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, pk, format=None):
+
         """
         A delete request that delete specific video using id.
         """
+
         try:
             video = Video.objects.get(pk=pk)
             id = video.videoUniqueId
@@ -192,108 +205,136 @@ class VideoList(APIView):
     
 
 class ArticleCommentListCreate(generics.ListCreateAPIView):
+
     """
     A view that get all article comments or delete all article comments data.
     """
+
     queryset = ArticleComment.objects.all()
     serializer_class = ArticleCommentSerializer
 
     def delete(self, request, *args, **kwargs):
+
         """
         A delete request that delete all article comment objects at once.
         """
+
         ArticleComment.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
     """
     A view for modifying (updating, deleting) article comments data and get the data using id.
     """
+
     queryset = ArticleComment.objects.all()
     serializer_class = ArticleCommentSerializer
     lookup_field = "pk"
 
 
 class ArticleCommentList(APIView):
+
     """
     A view that get all specific article comments using keyword.
     """
+
     def get(self, request, format=None):
+
         """
         A get request that get all specific article comments using keywords.
 
-        For example, when you set the view path as "/ArticleCommentList", to get all the articles
+        For example, when you set the view path as "/ArticleCommentList", to get all the article comments
         that has keyword "max" in content, use "/ArticleCommentList?keyword=max".
         """
+
         key = request.query_params.get("keyword", "")
 
         if key:
-            articles = ArticleComment.objects.filter(content__icontains=key)
+            # Return all objects which content contains the keyword.
+            articleComments = ArticleComment.objects.filter(content__icontains=key)
         else:
-            articles = ArticleComment.objects.all()
+            # If no filters are used, return all objects.
+            articleComments = ArticleComment.objects.all()
 
-        serializer = ArticleCommentSerializer(articles, many=True)
+        serializer = ArticleCommentSerializer(articleComments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
 class VideoCommentListCreate(generics.ListCreateAPIView):
+
     """
     A view that get all video comments or delete all video comments at once.
     """
+
     queryset = VideoComment.objects.all()
     serializer_class = VideoCommentSerializer
 
     def delete(self, request, *args, **kwargs):
+
         """
         A delete request that delete all video comment objects at once.
         """
+
         VideoComment.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class VideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
     """
     A view for modifying (updating, deleting) video comments data and get the data using id.
     """
+
     queryset = VideoComment.objects.all()
     serializer_class = VideoCommentSerializer
     lookup_field = "pk"
 
 
 class VideoCommentList(APIView):
+
     """
     A view that get all specific video comments using keyword.
     """
+
     def get(self, request, format=None):
+
         """
         A get request that get all specific article comments using keywords.
 
-        For example, when you set the view path as "/VideoCommentList", to get all the articles
+        For example, when you set the view path as "/VideoCommentList", to get all the video comments
         that has keyword "max" in content, use "/VideoCommentList?keyword=max".
         """
+
         key = request.query_params.get("keyword", "")
 
         if key:
-            articles = VideoComment.objects.filter(content__icontains=key)
+            # Return all objects which content contains the keyword.
+            videoComments = VideoComment.objects.filter(content__icontains=key)
         else:
-            articles = VideoComment.objects.all()
+            # If no filters are used, return all objects.
+            videoComments = VideoComment.objects.all()
 
-        serializer = VideoCommentSerializer(articles, many=True)
+        serializer = VideoCommentSerializer(videoComments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
 class SearchHistoryCreate(generics.ListCreateAPIView):
+
     """
     A view that get all users search histories or delete all search histories at once.
     """
+
     queryset = SearchHistory.objects.all()
     serializer_class = SearchHistorySerializer
 
     def delete(self, request, *args, **kwargs):
+
         """
         A delete request that delete all search history objects at once.
         """
+
         SearchHistory.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -301,9 +342,11 @@ class SearchHistoryCreate(generics.ListCreateAPIView):
     
 
 class SearchHistoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
     """
     A view for modifying (updating, deleting) search histories data and get the data using id.
     """
+
     queryset = SearchHistory.objects.all()
     serializer_class = SearchHistorySerializer
     lookup_field = "pk"
@@ -312,16 +355,20 @@ class SearchHistoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
 
 class SearchHistoryList(APIView):
+
     """
     A view that get all specific search histories using keyword.
     """
+
     def get(self, request, format=None):
+
         """
         A get request that get all specific article comments using keywords.
 
-        For example, when you set the view path as "/SearchHistoryList", to get all the articles
+        For example, when you set the view path as "/SearchHistoryList", to get all the search histories
         that has keyword "max" in the value, use "/SearchHistoryList?keyword=max".
         """
+
         key = request.query_params.get("keyword", "")
         if key:
             history = SearchHistory.objects.filter(searchValue__contains=key)
@@ -333,40 +380,50 @@ class SearchHistoryList(APIView):
     
 
 class UserListCreate(generics.ListCreateAPIView):
+
     """
     A view that get all users data or delete all users at once.
     """
+
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
 
     def delete(self, request, *args, **kwargs):
+
         """
         A delete request that delete all user objects at once.
         """
+
         CustomUser.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 class UserRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
     """
     A view for modifying (updating, deleting) user data and get the data using id.
     """
+
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     lookup_field = "pk"
 
 
 class UserList(APIView):
+
     """
     A view that get all specific users using keyword or registering new users
     """
-    def get(self, request, format=None):
-        """
-        A get request that get all specific article comments using keywords.
 
-        For example, when you set the view path as "/UserList", to get all the articles
+    def get(self, request, format=None):
+
+        """
+        A get request that get all specific users using keywords.
+
+        For example, when you set the view path as "/UserList", to get all the users
         that has keyword "max" in userId or username, use "/UserList?key=max".
         """
+
         key = request.query_params.get("key", "")
         if key:
             user = CustomUser.objects.filter(
@@ -380,34 +437,56 @@ class UserList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request, format=None):
+
+        """
+        A post request that creates user.
+        """
+
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
+            # Validate the serializer before creating the user
             user = CustomUser.objects.create_user(
                 email=serializer.validated_data['email'],
                 password=request.data.get('password'),
                 username=serializer.validated_data['username']
             )
-            return Response({'message': 'User created successfully!'}, status=status.HTTP_201_CREATED)
+            return Response({'message': f'User created successfully: {user.email}'}, status=status.HTTP_201_CREATED)
+        # If the serializer is not valid, return bad request
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
 class RegisterView(generics.CreateAPIView):
+
     """
     A view to register a user
     """
+
     queryset = CustomUser.objects.all()
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
+
+        """
+        Make a create request that registers a user
+        """
+
         serializer = self.get_serializer(data=request.data)
+        # Check if the serializer is valid. Otherwise, raise an error.
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        return Response({"message": "User registered successfully!", "user_id": user.userId}, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "message": "User registered successfully!",
+                "user_id": user.userId
+            }, 
+            status=status.HTTP_201_CREATED
+        )
     
 def get_home(request, *args, **kwargs):
     return render(request, 'index.html', {})
 
 def upload_to_google_drive(request, *args, **kwargs):
+
     """
     Upload to Google Drive is the form is valid. The form include the following fields:
     - videoBrandType: The technology topic of the video.
@@ -416,6 +495,7 @@ def upload_to_google_drive(request, *args, **kwargs):
     - file: The video's file, supporting video/mp4.
     If the form requests 
     """
+
     start = time.time()
     
     if request.method == "POST":
@@ -452,6 +532,7 @@ def upload_to_google_drive(request, *args, **kwargs):
                         )
                         message = f"File uploaded successfully: {video.id}, {video.videoUniqueId}"
                     except Exception as e:
+                        print(e)
                         return delete_file(request, file_id)
                 else:
                     message = "File upload was not succeed."
@@ -460,39 +541,51 @@ def upload_to_google_drive(request, *args, **kwargs):
 
             total_time = end - start
 
-            return render(request, 'upload_result.html', {
-                'message': message, 
-                "files": None, 
-                "time_message": f"Total time: {total_time}s"
-                })
+            return render(
+                request, 
+                'upload_result.html', 
+                {
+                    'message': message, 
+                    "time_message": f"Total time: {total_time}s"
+                }
+            )
     else:
         form = FileUploadForm()
 
-    return render(request, 'upload_form.html', {
-        'form': form, 
-        'form_type': "a",
-        'data': None
-        })
+    return render(
+        request, 
+        'upload_form.html', 
+        {
+            'form': form, 
+            'form_type': "a",
+        }
+    )
 
 def upload_to_google_drive_with_url(request, *args, **kwargs):
+
+    """
+    A function that manages the uploading form using url only. However, this function
+    only applies to specific website like Tiktok. The others have not been supported yet.
+    """
+
     start = time.time()
     if request.method == 'POST':
         form = FileUploadFormWithUrl(request.POST, request.FILES)
         if form.is_valid():
-            action = request.POST.get('action')
             message = ""
-            file_path = None
-            videoContent = None
-            if action == 'get_data':
+            file_path = None # The file path that stores videos temporarily.
+            videoContent = None # The stored data value
+            if "get_data" in request.POST:
                 url = form.cleaned_data.get("URL")
                 try:
-                    videoContent = get_video_content(url)
+                    videoContent = get_video_content(url, settings.MEDIA_ROOT, "tempvideo.mp4")
                     file_path = os.path.join(settings.MEDIA_ROOT, "tempvideo.mp4")
-
-                    res = requests.get(url)
-                    with open(file_path, 'wb+') as destination:
-                        for chunk in res.iter_content(chunk_size=8192):
-                            destination.write(chunk)
+                    if videoContent.get("csv_file", None):
+                        csv_file = videoContent.pop("csv_file")
+                        os.remove(csv_file)
+                    with open('temp.txt', "w") as f:
+                        json.dump(videoContent, f, indent=4)
+                    
                     return render(
                         request,
                         'upload_form.html',
@@ -507,13 +600,16 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
                         request,
                         'upload_result.html',
                         {
-                            'message': "Error getting content from {url}: {e}",
+                            'message': f"Error getting content from {url}: {e}",
                             'files': None,
                             'time_message': f"Total time: {end - start}s"
                         }
                     )
-            elif action == 'upload':
-                if not videoContent and not file_path:
+            elif 'upload' in request.POST:
+                file_path = os.path.join(settings.MEDIA_ROOT, "tempvideo.mp4")
+                with open("temp.txt", "r") as file:
+                    videoContent = json.load(file)
+                if not videoContent or not os.path.exists(file_path):
                     end = time.time()
                     return render(
                         request,
@@ -534,34 +630,55 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
                     os.remove(file_path)
 
                     if file_id:
+                        message = f"Brand type: {videoBrandType}, title: {videoContent.get('title', '')}, author: {videoContent.get('author', '')}"  
                         try:
                             video = Video.objects.create(
                                 videoUniqueId=file_id,
                                 videoBrandType=videoBrandType,
                                 author=videoContent["author"],
                                 title=videoContent["title"],
-                                url=videoContent["src"]
+                                url=url
                             )
                             message = f"Video uploaded successfully: {video.id} - {video.videoUniqueId}"
                         except Exception as e:
-                            return delete_file(request, file_id)
-
+                            return delete_file(request, file_id, e + message)
+            elif 'reset' in request.POST:
+                file_path = os.path.join(settings.MEDIA_ROOT, "tempvideo.mp4")
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                return render(
+                    request,
+                    'upload_form.html',
+                    {
+                        "form": form,
+                        "form_type": "b"
+                    }
+                )
             end = time.time()
             total_time = end - start
-            return render(request, 'upload_result.html', {
-                'message': message, 
-                "files": None,
-                "time_message": f"Total time: {total_time}s"
-                })
+            return render(
+                request, 
+                'upload_result.html', 
+                {
+                    'message': message, 
+                    "time_message": f"Total time: {total_time}s"
+                }
+            )
     else:
         form = FileUploadFormWithUrl()
-    return render(request, 'upload_form.html', {
-        'form': form, 
-        'form_type': "b",
-        'data': None
-        })
+    return render(
+        request, 
+        'upload_form.html', 
+        {
+            'form': form, 
+            'form_type': "b",
+        }
+    )
 
 def list_files(request):
+    """
+    Listing all stored videos in google drive if they exist.
+    """
     start = time.time()
     files = list_all_files()
 
@@ -571,9 +688,22 @@ def list_files(request):
         message = "List of files: "
     end = time.time()
 
-    return render(request, 'upload_result.html', {'message': message, "files": files, "time_message": f"Total time: {end - start}s"})
+    return render(
+        request, 
+        'upload_result.html', 
+        {
+            'message': message, 
+            "files": files, 
+            "time_message": f"Total time: {end - start}s"
+        }
+    )
 
 def get_file(request, id):
+
+    """
+    Get specific file based on its id.
+    """
+
     start = time.time()
     file = get_specific_file(id)
 
@@ -583,57 +713,286 @@ def get_file(request, id):
         message = f"File {id}"
     end = time.time()
 
-    return render(request, 'upload_result.html', {'message': message, "files": [file], "time_message": f"Total time: {end - start}s"})
+    return render(
+        request, 
+        'upload_result.html', 
+        {
+            'message': message, 
+            "files": [file], 
+            "time_message": f"Total time: {end - start}s"
+        }
+    )
 
-def delete_file(request, id):
+def delete_file(request, id, message=None):
+
+    """
+    Delete the video files from database and Google Drive existance.
+    """
+
     start = time.time()
     try:
+        # Delete file from Google Drive
         file = delete_specific_file(id)
+        # Delete file from database
         Video.objects.get(videoUniqueId=id).delete()
-        message = f"File deleted successfully: {file}"
+        if not message:
+            message = f"File deleted successfully: {file}"
     except Video.DoesNotExist:
-        message = "Video does not exist in database."
+        if not message:
+            message = "Video does not exist in database."
     except Exception as e:
-        message = f'Error deleting file {id}: {e}'
+        if not message:
+            message = f'Error deleting file {id}: {e}'
     end = time.time()
 
-    return render(request, 'upload_result.html', {'message': message, "files": None, "time_message": f"Total time: {end - start}s"})
+    return render(
+        request, 
+        'upload_result.html', 
+        {
+            'message': message, 
+            "time_message": f"Total time: {end - start}s"
+        })
 
 def fetch_file(request, id):
     file_url = f'https://drive.google.com/uc?export=download&id={id}'
     response = requests.get(file_url)
     if response.status_code == 200:
-        return HttpResponse(response.content, content_type=response.headers['Content-Type'])
+        return HttpResponse(
+            response.content, 
+            content_type=response.headers['Content-Type']
+        )
     else:
-        return HttpResponse("Error fetching file", status=400)
+        return HttpResponse(
+            "Error fetching file", 
+            status=status.HTTP_400_BAD_REQUEST
+        )
     
-def get_video_content(url: str):
+def get_video_content(url: str, output_folder: str = None, output_file: str = None):
+
+    """
+    Returns the author, title, and video src from tiktok url.
+    """
+    
     if url.startswith("https://www.tiktok.com"):
-        while True:
-            driver = webdriver.Chrome(service=Service("E:\ChromeDriver\chromedriver.exe"))
+        # The url returns multiple kind of templates in a single url
+        # limit_loop = 0
+        # while limit_loop < 15:
+        #     try:
+                # Replace with your own driver
+                # For more information, visit https://developer.chrome.com/docs/chromedriver
+                # driver = webdriver.Chrome(service=Service("E:\ChromeDriver\chromedriver.exe"))
 
-            driver.get(url)
+                # driver.get(url)
 
-            page_source = driver.page_source
+                # time.sleep(6)
 
-            bs = BeautifulSoup(page_source, "html.parser")
-            mainContentVideoDetail = bs.find("div", {"id": "app"}).find("div", {"id": "main-content-video_detail"})
-            divPlayerContainer = mainContentVideoDetail.find("div", {"class": "eqrezik4"})
-            tiktokWebPlayer = divPlayerContainer.find("div", {"class": "tiktok-web-player"})
-            videoTag = tiktokWebPlayer.find("video")
-            source = videoTag.find_all("source")
-            contentContainer = divPlayerContainer.find("div", {"class": "eqrezik17"})
-            author = contentContainer.find("div", {"class": "evv7pft3"}).find("span", {"class": "e17fzhrb1"}).text
-            title = contentContainer.find("h1", {"data-e2e": "browse-video-desc"}).text
+                # page_source = driver.page_source
 
-            if source:
-                src = source[2].get("src")
-            else:
-                src = videoTag.get("src")
-            driver.quit()
-            if src.startswith("https://www.tiktok.com/"):
+                # bs = BeautifulSoup(page_source, "html.parser")
+                # Check every tag's existance. If not, raise an exception.
+                # app = bs.find("div", {"id": "app"})
+                # if not app:
+                #     raise ValueError("The app tag may not exist.")
+                
+                # mainContentVideoDetail = app.find("div", {"id": "main-content-video_detail"})
+                # if not mainContentVideoDetail:
+                #     raise ValueError("The mainContentVideoDetail tag may not exist.")
+                
+                # divPlayerContainer = mainContentVideoDetail.find("div", {"class": "eqrezik4"})
+                # if not divPlayerContainer:
+                #     raise ValueError("The divPlayerContainer tag may not exist.")
+                
+                # tiktokWebPlayer = divPlayerContainer.find("div", {"class": "tiktok-web-player"})
+                # if not tiktokWebPlayer:
+                #     raise ValueError("The tiktokWebPlayer tag may not exist.")
+                
+                # videoTag = tiktokWebPlayer.find("video")
+                # if not videoTag:
+                #     raise ValueError("The videoTag may not exist.")
+                
+                # source = videoTag.find_all("source")
+                # if not source:
+                #     raise ValueError("The source tag may not exist.")
+                
+                # contentContainer = divPlayerContainer.find("div", {"class": "eqrezik17"})
+                # if not contentContainer:
+                #     raise ValueError("The contentContainer tag may not exist")
+                
+                # authorTag = contentContainer.find("div", {"class": "evv7pft3"}).find("span", {"class": "e17fzhrb1"})
+                # authorTag = contentContainer.find("span", {"class": "e17fzhrb1"})
+                # if not authorTag:
+                #     raise ValueError("The author tag may not exist.")
+                
+                # titleTag = contentContainer.find("h1", {"data-e2e": "browse-video-desc"})
+                # if not titleTag:
+                #     raise ValueError("The title tag may not exist")
+
+                # author = authorTag.text
+                # title = titleTag.text
+
+                # if source:
+                #     src = source[2].get("src")
+                # else:
+                #     src = videoTag.get("src")
+                # driver.quit()
+                # if src.startswith("https://www.tiktok.com/"):
+                #     return {
+                #         "author": author,
+                #         "title": title,
+                #         "src": src
+                #     }
+            #     limit_loop += 1
+            # except WebDriverException as e:
+            #     raise WebDriverException(e)
+            # except:
+            #     limit_loop += 1
+        # raise Exception("Unable to obtain data. The number of requests reaches the limit.")
+
+        # If the library remains stable, the program is still working.
+        pyk.specify_browser("chrome")
+
+        pyk.save_tiktok(
+            url,
+            True,
+            'data.csv'
+        )
+
+        time.sleep(5)
+
+        files = os.listdir(".")
+        csv_file_path = None
+        for file in files:
+            if os.path.isfile(f"./{file}") and file.endswith(".mp4"):
+                try:
+                    shutil.move(f"./{file}", os.path.join(output_folder, output_file))
+                except FileNotFoundError:
+                    raise Exception(f"Could not found the file {file}.")
+                except PermissionError:
+                    raise Exception(f"Permission denied when moving: {file}")
+                except Exception as e:
+                    raise Exception(f"An error occured: {e}")
+            elif os.path.isfile(f"./{file}") and file.endswith(".csv"):
+                try:
+                    shutil.move(f"./{file}", output_folder)
+                    csv_file_path = os.path.join(output_folder, file)
+                except FileNotFoundError:
+                    raise Exception(f"Could not found the file {file}.")
+                except PermissionError:
+                    raise Exception(f"Permission denied when moving: {file}")
+                except Exception as e:
+                    raise Exception(f"An error occured: {e}")
+
+        if not csv_file_path or not os.path.exists(csv_file_path):
+            n1 = "\n"
+            raise Exception(f"An error occured getting csv file: {csv_file_path}, file list: {n1.join([f for f in files])}")
+        saved_data = pd.read_csv(csv_file_path)
+        author = saved_data.iloc[saved_data.shape[0] - 1]['author_name']
+        title = saved_data.iloc[saved_data.shape[0] - 1]['video_description']
+        return {
+            "author": author,
+            "title": title,
+            "src": url,
+            "csv_file": csv_file_path
+        }
+
+    elif url.startswith("https://www.youtube.com"):
+        try:
+            # Library pytube, deprecated (does not work).
+            # 
+            # yt = YouTube(url)
+            # os.makedirs(output_folder, exist_ok=True)
+
+            # title = yt.title
+            # author = yt.author
+
+            # stream = yt.streams.filter(progressive=True, file_extension="mp4").first()
+            # stream.download(output_path=output_folder, filename=output_file)
+
+            # return {
+            #     "author": author,
+            #     "title": title,
+            #     "src": url
+            # }
+            ydl_opts = {
+                "outtmpl": os.path.join(output_folder, output_file),
+                "format": "mp4/best"
+            }
+
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info_dict = ydl.extract_info(url, download=True)
+
+                title = info_dict.get("title", None)
+                author = info_dict.get("uploader", None)
+
                 return {
                     "author": author,
                     "title": title,
-                    "src": src
+                    "src": url
                 }
+
+        except Exception as e:
+            raise Exception(e)
+    else:
+        raise ValueError("URL does not exist or has not been supported yet.")
+    
+def load_and_write(url, folder, filename):
+    driver = webdriver.Chrome(service=Service("E:\ChromeDriver\chromedriver.exe"))
+    driver.get(url)
+
+    # WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "video")))
+    # file_url = driver.current_url
+    # print(f"Current url: {file_url}")
+
+    # api = TikTokApi()
+    # video_bytes = api.video(url=url).bytes()
+    # time.sleep(5)
+    # page_source = driver.page_source
+
+    # bs = BeautifulSoup(page_source, "html.parser")
+    # videoSrc = bs.find("video").find("source").get("src")
+    # res = requests.get(videoSrc, stream=True, allow_redirects=True)
+    # with requests.get(file_url, stream=True) as response:
+    #     response.raise_for_status()
+        # with open(path, "wb") as destination:
+        #     for chunk in response.iter_content(chunk_size=8192):
+        #         if chunk:
+        #             print("Writing...")
+        #             destination.write(chunk)
+        #     print("Writing complete.")
+
+    video_element = driver.find_element(By.TAG_NAME, "video")
+    video_src = video_element.get_attribute("src")
+    if not video_src:
+        video_src = driver.find_element(By.TAG_NAME, "source").get_attribute("src")
+        if not video_src:
+            raise Exception("Could not find video.")
+        
+    response = requests.get(video_src, stream=True)
+    if response.status_code == 200:
+        with open(os.path.join(folder, filename), "wb") as destination:
+            for chunk in response.iter_content(chunk_size=2048):
+                destination.write(chunk)
+        print("Writing complete.")
+    else:
+        raise requests.exceptions.HTTPError(f"Status code is not 200: {response.status_code}")
+    driver.quit()
+
+def update_video_comment_number(request, videoId):
+    start = time.time()
+    try:
+        video = Video.objects.get(id=videoId)
+        videoCommentsNum = VideoComment.objects.filter(videoId=videoId).count()
+
+        video.commentNum = videoCommentsNum
+        message = "Update video comment number successfully"
+    except Exception as e:
+        message = f"Error updating comment number: {e}"
+    end = time.time()
+    return render(
+        request,
+        "upload_result.html",
+        {
+            "message": message,
+            "time_message": f"Total time: {end - start}s"
+        }
+    )

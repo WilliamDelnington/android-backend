@@ -31,7 +31,7 @@
             border-radius: 5px;
         }
 
-        button {
+        input[type="submit"] {
             border: none;
             color: white;
             background-color: green;
@@ -62,17 +62,12 @@
             {{ form.files.label_tag }}
             {{ form.files }}
         </div>
-        <button type="submit">Upload</button>
+        <input type="submit" value="Upload">
     </form>
-    {% if data %}
-    <p>Author: {{ data.author }}</p>
-    <p>Title: {{ data.title }}</p>
-    <p>URL: {{ data.src }}</p>
-    {% endif %}
     {% endif %}
 
     {% if form_type == "b" %}
-    <form method="POST" enctype="multipart/form-data">
+    <form action="" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-group">
             {{ form.videoBrandType.label_tag }}
@@ -82,9 +77,23 @@
             {{ form.URL.label_tag }}
             {{ form.URL }}
         </div>
-        <button type="submit" name="action" type="get_data">Get Data</button>
-        <button type="submit" name="action" type="upload">Upload</button>
+        <input type="submit" name="get_data" value="Get Data">
+        <input type="submit" name="reset" value="Reset">
+        <input type="submit" name="upload" value="Upload">
     </form>
+    {% if data %}
+    <div>
+        <div class="paragraph">
+            <p>Author: {{ data.author }}</p>
+        </div>
+        <div class="paragraph">
+            <p>Title: {{ data.title }}</p>
+        </div>
+        <div class="paragraph">
+            <p style="max-width: 400px; word-break: break-all;">URL: {{ data.src }}</p>
+        </div>
+    </div>
+    {% endif %}
     {% endif %}
 </body>
 </html>
