@@ -582,7 +582,7 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
                     file_path = os.path.join(settings.MEDIA_ROOT, "tempvideo.mp4")
                     if videoContent.get("csv_file", None):
                         csv_file = videoContent.pop("csv_file")
-                        os.remove(csv_file)
+                        # os.remove(csv_file)
                     with open('temp.txt', "w") as f:
                         json.dump(videoContent, f, indent=4)
                     
@@ -851,6 +851,7 @@ def get_video_content(url: str, output_folder: str = None, output_file: str = No
         # If the library remains stable, the program is still working.
         pyk.specify_browser("chrome")
 
+        # When this line executes, it will download all its content to the path it executed.
         pyk.save_tiktok(
             url,
             True,
@@ -862,8 +863,9 @@ def get_video_content(url: str, output_folder: str = None, output_file: str = No
         files = os.listdir(".")
         csv_file_path = None
         for file in files:
-            if os.path.isfile(f"./{file}") and file.endswith(".mp4"):
+            if os.path.isfile(f"./{file}") and file.endswith((".mp4", ".mkv")):
                 try:
+                    # Move the mp4 (video file) to the destination
                     shutil.move(f"./{file}", os.path.join(output_folder, output_file))
                 except FileNotFoundError:
                     raise Exception(f"Could not found the file {file}.")
@@ -872,15 +874,16 @@ def get_video_content(url: str, output_folder: str = None, output_file: str = No
                 except Exception as e:
                     raise Exception(f"An error occured: {e}")
             elif os.path.isfile(f"./{file}") and file.endswith(".csv"):
-                try:
-                    shutil.move(f"./{file}", output_folder)
-                    csv_file_path = os.path.join(output_folder, file)
-                except FileNotFoundError:
-                    raise Exception(f"Could not found the file {file}.")
-                except PermissionError:
-                    raise Exception(f"Permission denied when moving: {file}")
-                except Exception as e:
-                    raise Exception(f"An error occured: {e}")
+                # try:
+                #     shutil.move(f"./{file}", output_folder)
+                #     csv_file_path = os.path.join(output_folder, file)
+                # except FileNotFoundError:
+                #     raise Exception(f"Could not found the file {file}.")
+                # except PermissionError:
+                #     raise Exception(f"Permission denied when moving: {file}")
+                # except Exception as e:
+                #     raise Exception(f"An error occured: {e}")
+                csv_file_path = os.path.join(".", file)
 
         if not csv_file_path or not os.path.exists(csv_file_path):
             n1 = "\n"
@@ -978,6 +981,11 @@ def load_and_write(url, folder, filename):
     driver.quit()
 
 def update_video_comment_number(request, videoId):
+
+    """
+    Update the number of comments in the video.
+    """
+
     start = time.time()
     try:
         video = Video.objects.get(id=videoId)
@@ -996,3 +1004,31 @@ def update_video_comment_number(request, videoId):
             "time_message": f"Total time: {end - start}s"
         }
     )
+
+def update_article_comment_number(request, articleId):
+
+    """
+    Update the number of comments for the article.
+    """
+
+    start = time.time()
+    try:
+        article = Article.objects.get(id=articleId)
+        articleCommentsNum = ArticleComment.objects.filter(articleId=articleId).count()
+
+        article.commentNum = articleCommentsNum
+        message = "Update video comment number successfully"
+    except Exception as e:
+        message = f"Error updating comment number: {e}"
+    end = time.time()
+    return render(
+        request,
+        "upload_result.html",
+        {
+            "message": message,
+            "time_message": f"Total time: {end - start}s"
+        }
+    )
+
+def get_not_found_page(request, exception):
+    return render(request, '404_not_found.html', status=status.HTTP_404_NOT_FOUND)
