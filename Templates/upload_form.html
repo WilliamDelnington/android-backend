@@ -46,7 +46,7 @@
     {% if form_type == "a" %}
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        <div class="form-group">
+        <!-- <div class="form-group">
             {{ form.videoBrandType.label_tag }}
             {{ form.videoBrandType }}
         </div>
@@ -61,7 +61,13 @@
         <div class="form-group">
             {{ form.files.label_tag }}
             {{ form.files }}
+        </div> -->
+        {% for field in form %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
         </div>
+        {% endfor %}
         <input type="submit" value="Upload">
     </form>
     {% endif %}
@@ -94,6 +100,33 @@
         </div>
     </div>
     {% endif %}
+    {% endif %}
+
+    {% if form_type == 'c' %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+        </div>
+        {% endfor %}
+    </form>
+    {% endif %}
+
+    {% if form_type == 'd' %}
+    <form action="" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+        </div>
+        {% endfor %}
+        <input type="submit" name="get_data" value="Get Data">
+        <input type="submit" name="reset" value="Reset">
+        <input type="submit" name="upload" value="Upload">
+    </form>
     {% endif %}
 </body>
 </html>

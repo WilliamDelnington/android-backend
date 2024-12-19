@@ -2,14 +2,16 @@ from django.shortcuts import render
 from django.db.models import Q
 from django.conf import settings
 from django.http import HttpResponse
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.permissions import IsAdminUser
+
 from .models import Article, Video, ArticleComment, VideoComment, SearchHistory, CustomUser
 from .serializer import *
 from .utils import upload_file, list_all_files, get_specific_file, delete_specific_file
-from .forms import FileUploadForm, FileUploadFormWithUrl
+from .forms import FileUploadForm, FileUploadFormWithUrl, ArticleUploadForm, ArticleUploadFromWithUrl
 # from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -672,6 +674,75 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
         {
             'form': form, 
             'form_type': "b",
+        }
+    )
+
+def upload_article(request, *args, **kwargs):
+    start = time.time()
+    if request.method == 'POST':
+        form = ArticleUploadForm(request.POST)
+        if form.is_valid():
+            articleId = form.cleaned_data.get("articleId")
+            articleBrandType = form.cleaned_data.get("articleBrandType")
+            sourceName = form.cleaned_data.get("sourceName")
+            author = form.cleaned_data.get("author", "")
+            title = form.cleaned_data.get("title")
+            description = form.cleaned_data.get("description", "")
+            url = form.cleaned_data.get("url", "")
+            urlToImage = form.cleaned_data.get("urlToImage", "")
+            publishedAt = form.cleaned_data.get("publishedAt")
+            content = form.cleaned_data.get("content")
+
+            try:
+                article = Article.objects.create(
+                    articleUniqueId=articleId,
+                    articleBrandType=articleBrandType,
+                    sourceName=sourceName,
+                    author=author,
+                    title=title,
+                    description=description,
+                    url=url,
+                    urlToImage=urlToImage,
+                    publishedAt=publishedAt,
+                    content=content
+                )
+                message = f"Article object created successfully: {article.articleUniqueId}"
+            except Exception as e:
+                message = f"An error creating Article object: {e}"
+            end = time.time()
+            return render(
+                request,
+                "upload_result.html",
+                {
+                    "message": message,
+                    "time_message": f"Total time: {end - start}"
+                }
+            )
+    else:
+        form = ArticleUploadForm()
+
+    return render(
+        request, 
+        'index.html',
+        {
+            'form': form,
+            'form_type': "c"
+        }
+    )
+
+def upload_article_with_only_url(request, *args, **kwargs):
+    if request.method == 'POST':
+        form = ArticleUploadFromWithUrl(request.POST)
+
+    else:
+        form = ArticleUploadFromWithUrl()
+
+    return render(
+        request,
+        'upload_form.html',
+        {
+            "form": form,
+            'form_type': "d"
         }
     )
 
