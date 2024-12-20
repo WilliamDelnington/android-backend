@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from typing import List, Tuple
 from datetime import datetime
 import traceback
+import threading
 
 articleFrom = set()
 brand = "Google"
@@ -351,16 +352,29 @@ def main():
         else:
             print(f"Failed To Parse Data from {data[brand][i]['url']}")
 
-def main2():
-    for i in range(len(data[brand])):
-        sourceName = data[brand][i]['source']['name']
+def main2(brand, semaphore):
+    with semaphore:
+        for i in range(len(data[brand])):
+            sourceName = data[brand][i]['source']['name']
 
-        url = data[brand][i]['url']
-        try:
-            res = requests.get(url, timeout=100)
+            url = data[brand][i]['url']
+            try:
+                res = requests.get(url, timeout=100)
 
-            print(f"News {sourceName} with url {url} has status {res.status_code}")
-        except Exception as e:
-            print(f"Error getting content in url {url}: {e}")
+                print(f"News {sourceName} with url {url} has status {res.status_code}")
+            except Exception as e:
+                print(f"Error getting content in url {url}: {e}")
 
-main()
+brands = ["Samsung", "Apple", "Nokia", "Huawei", "Xiaomi", "Micorsoft", "Google", "Asus", "Dell"]
+
+max_threads = 2
+semaphore = threading.Semaphore(max_threads)
+threads = []
+
+for brand in brands:
+    thread = threading.Thread(target=main2, args=(brand, semaphore))
+    threads.append(thread)
+    thread.start()
+
+for thread in threads:
+    thread.join()
