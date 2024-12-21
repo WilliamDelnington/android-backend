@@ -178,7 +178,8 @@ class ArticleUploadForm(forms.Form):
 
     publishedAt = forms.DateTimeField(
         required=False,
-        widget=forms.DateTimeInput(attrs={
+        widget=forms.TextInput(attrs={
+            "type": "datetime-local",
             "class": "form-control"
         })
     )
@@ -193,7 +194,7 @@ class ArticleUploadForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["articleId"].label = "Article Id:"
-        self.fields["articleBrandType"].label = "Source Name:"
+        self.fields["articleBrandType"].label = "Source Type:"
         self.fields["sourceName"].label = "Source Name:"
         self.fields["author"].label = "Author:"
         self.fields["title"].label = "Title:"
@@ -208,3 +209,12 @@ class ArticleUploadForm(forms.Form):
         if not publishedAt:
             return timezone.now()
         return publishedAt
+    
+class ArticleUploadFromWithUrl(forms.Form):
+    url = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["url"].label = "URL:"

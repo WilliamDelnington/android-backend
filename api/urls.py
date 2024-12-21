@@ -63,7 +63,7 @@ urlpatterns = [
         name="list-files-in-google-drive"
         ),
     path(
-        'videos/updateComments/<str:videoId', 
+        'videos/updateComments/<str:videoId>', 
         views.update_video_comment_number, 
         name="update-video-comment-number"
         ),

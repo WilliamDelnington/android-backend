@@ -378,3 +378,18 @@ for brand in brands:
 
 for thread in threads:
     thread.join()
+
+article_type = {}
+
+def main3(brands):
+    for brand in brands:
+        for i in range(len(data[brand])):
+            sourceName = data[brand][i]["source"]["name"]
+
+            if sourceName not in article_type:
+                article_type[sourceName] = 1
+            else:
+                article_type[sourceName] += 1
+
+main3(brands)
+print(article_type)

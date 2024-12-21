@@ -16,72 +16,72 @@
         {% if form %}
         <form id="dataForm" method="post">
             {% csrf_token %}
-            <!-- <div class="form-group">
-                <label for="Id">Article Id</label>
-                <input type="text" id="id" name="id" required>
+            <div class="form-group">
+                <!-- <label for="Id">Article Id</label>
+                <input type="text" id="id" name="id" required> -->
                 {{ form.articleId.label_tag }}
                 {{ form.articleId }}
             </div>
             <div class="form-group">
-                <label for="brandType">Article About</label>
-                <input type="text" id="brandType" name="brandType" required>
+                <!-- <label for="brandType">Article About</label>
+                <input type="text" id="brandType" name="brandType" required> -->
                 {{ form.articleBrandType.label_tag }}
                 {{ form.articleBrandType }}
             </div>
             <div class="form-group">
-                <label for="sourceName">Source Name</label>
-                <input type="text" id="sourceName" name="sourceName">
+                <!-- <label for="sourceName">Source Name</label>
+                <input type="text" id="sourceName" name="sourceName"> -->
                 {{ form.sourceName.label_tag }}
                 {{ form.sourceName }}
             </div>
             <div class="form-group">
-                <label for="author">Author</label>
-                <input type="text" id="author" name="author">
+                <!-- <label for="author">Author</label>
+                <input type="text" id="author" name="author"> -->
                 {{ form.author.label_tag }}
                 {{ form.author }}
             </div>
             <div class="form-group">
-                <label for="title">Title</label>
-                <textarea id="title" name="title" rows="2"></textarea>
+                <!-- <label for="title">Title</label>
+                <textarea id="title" name="title" rows="2"></textarea> -->
                 {{ form.title.label_tag }}
                 {{ form.title }}
             </div>
             <div class="form-group">
-                <label for="description">Description</label>
-                <textarea id="description" name="description" rows="3"></textarea>
+                <!-- <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3"></textarea> -->
                 {{ form.description.label_tag }}
                 {{ form.description }}
             </div>
             <div class="form-group">
-                <label for="url">URL</label>
-                <input type="url" id="url" name="url">
+                <!-- <label for="url">URL</label>
+                <input type="url" id="url" name="url"> -->
                 {{ form.url.label_tag }}
                 {{ form.url }}
             </div>
             <div class="form-group">
-                <label for="urlToImage">URL to Image</label>
-                <input type="url" id="urlToImage" name="urlToImage">
+                <!-- <label for="urlToImage">URL to Image</label>
+                <input type="url" id="urlToImage" name="urlToImage"> -->
                 {{ form.urlToImage.label_tag }}
                 {{ form.urlToImage }}
             </div>
             <div class="form-group">
-                <label for="publishedAt">Time Published</label>
-                <input type="datetime-local" id="publishedAt" name="publishedAt" required>
+                <!-- <label for="publishedAt">Time Published</label>
+                <input type="datetime-local" id="publishedAt" name="publishedAt" required> -->
                 {{ form.publishedAt.label_tag }}
                 {{ form.publishedAt }}
             </div>
             <div class="form-group">
-                <label for="content">Content</label>
-                <textarea id="content" name="content" rows="5"></textarea>
+                <!-- <label for="content">Content</label>
+                <textarea id="content" name="content" rows="5"></textarea> -->
                 {{ form.content.label_tag }}
                 {{ form.content }}
-            </div> -->
-            {% for field in form %}
+            </div>
+            <!-- {% for field in form %}
             <div class="form-group">
                 { field.label_tag }
                 { field }
             </div>
-            {% endfor %}
+            {% endfor %} -->
             <button type="submit">Save Data</button>
             <button type="button" id="viewSavedFormsBtn">Saved form</button>
         </form>
