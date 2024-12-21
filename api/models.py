@@ -63,6 +63,7 @@ class Video(models.Model):
   author = models.CharField(max_length=200, null=True)
   title = models.TextField(null=True)
   url = models.TextField(null=True)
+  fetchable_url = models.TextField(null=True)
   createdTime = models.DateTimeField(null=False, default=timezone.now)
   commentNum = models.IntegerField(null=False, default=0)
 
