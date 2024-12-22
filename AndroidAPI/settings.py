@@ -129,9 +129,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'androiddatabase',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
+        'USER': 'admin',
+        'PASSWORD': 'Huy17112003',
+        'HOST': 'database-1.c5q8k0ye0au5.ap-southeast-2.rds.amazonaws.com',
         'PORT': '3306'
     }
 }
@@ -179,5 +179,3 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
-
-django_on_heroku.settings(locals())
