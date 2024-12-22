@@ -10,16 +10,25 @@ load_dotenv()
 def authenticate_drive():
 #   To publish the code to github, the json file path must be called
 # through the environment, or else the commit will be blocked or the key will be disabled.
-  credentials = service_account.Credentials.from_service_account_file(
-    os.getenv("GOOGLE_DRIVE_CREDENTIALS_JSON_FILE_PATH")
-   )
-  if not credentials:
-     credentials = service_account.Credentials.from_service_account_info(
-        json.loads(os.getenv("GOOGLE_DRIVE_CREDENTIALS_JSON"))
-     )
-  drive_service = build('drive', 'v3', credentials=credentials)
+   try:
+      credentials = service_account.Credentials.from_service_account_file(
+         os.getenv("GOOGLE_DRIVE_CREDENTIALS_JSON_FILE_PATH")
+         )
+      drive_service = build('drive', 'v3', credentials=credentials)
+
+      return drive_service
+   except:
+      try: 
+         credentials = service_account.Credentials.from_service_account_info(
+         json.loads(os.getenv("GOOGLE_DRIVE_CREDENTIALS_JSON"))
+         )
   
-  return drive_service
+         drive_service = build('drive', 'v3', credentials=credentials)
+
+         return drive_service
+      except Exception as e:
+         raise Exception(e)
+  
 
 service = authenticate_drive()
 
