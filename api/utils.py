@@ -4,7 +4,7 @@ from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
 import os
 from dotenv import load_dotenv
-
+import json
 
 load_dotenv()
 def authenticate_drive():
@@ -13,6 +13,10 @@ def authenticate_drive():
   credentials = service_account.Credentials.from_service_account_file(
     os.getenv("GOOGLE_DRIVE_CREDENTIALS_JSON_FILE_PATH")
    )
+  if not credentials:
+     credentials = service_account.Credentials.from_service_account_info(
+        json.loads(os.getenv("GOOGLE_DRIVE_CREDENTIALS_JSON"))
+     )
   drive_service = build('drive', 'v3', credentials=credentials)
   
   return drive_service
