@@ -130,8 +130,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'androiddatabase',
         'USER': 'admin',
-        'PASSWORD': 'Huy17112003',
-        'HOST': 'database-1.c5q8k0ye0au5.ap-southeast-2.rds.amazonaws.com',
+        'PASSWORD': 'huy17112003',
+        'HOST': 'android-database.c5q8k0ye0au5.ap-southeast-2.rds.amazonaws.com',
         'PORT': '3306'
     }
 }
