@@ -1,1 +1,1 @@
-web: gunicorn --timeout 150 AndroidAPI.wsgi
+web: gunicorn --timeout 60 AndroidAPI.wsgi
