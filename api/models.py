@@ -64,6 +64,8 @@ class Video(models.Model):
   title = models.TextField(null=True)
   url = models.TextField(null=True)
   fetchable_url = models.TextField(null=True)
+  thumbnailImageUrl = models.TextField(null=True)
+  thumbnailImageFetchableUrl = models.TextField(null=True)
   createdTime = models.DateTimeField(null=False, default=timezone.now)
   commentNum = models.IntegerField(null=False, default=0)
 
