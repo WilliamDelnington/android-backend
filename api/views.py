@@ -639,7 +639,8 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
                                 videoBrandType=videoBrandType,
                                 author=videoContent["author"],
                                 title=videoContent["title"],
-                                url=url
+                                url=url,
+                                fetchable_url=f'https://drive.google.com/uc?export=download?id={file_id}'
                             )
                             message = f"Video uploaded successfully: {video.id} - {video.videoUniqueId}"
                         except Exception as e:
@@ -1103,3 +1104,4 @@ def update_article_comment_number(request, articleId):
 
 def get_not_found_page(request, exception):
     return render(request, '404_not_found.html', status=status.HTTP_404_NOT_FOUND)
+
