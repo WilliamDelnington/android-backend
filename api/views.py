@@ -1,7 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.conf import settings
 from django.http import HttpResponse
+from django.contrib.auth import authenticate, login, update_session_auth_hash
+from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView, PasswordResetCompleteView, PasswordResetDoneView
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,7 +15,7 @@ from rest_framework.permissions import IsAdminUser
 from .models import Article, Video, ArticleComment, VideoComment, SearchHistory, CustomUser
 from .serializer import *
 from .utils import upload_file, list_all_files, get_specific_file, delete_specific_file
-from .forms import FileUploadForm, FileUploadFormWithUrl, ArticleUploadForm, ArticleUploadFromWithUrl
+from .forms import *
 # from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -876,81 +880,6 @@ def get_video_content(url: str, output_folder: str = None, output_file: str = No
     """
     
     if url.startswith("https://www.tiktok.com"):
-        # The url returns multiple kind of templates in a single url
-        # limit_loop = 0
-        # while limit_loop < 15:
-        #     try:
-                # Replace with your own driver
-                # For more information, visit https://developer.chrome.com/docs/chromedriver
-                # driver = webdriver.Chrome(service=Service("E:\ChromeDriver\chromedriver.exe"))
-
-                # driver.get(url)
-
-                # time.sleep(6)
-
-                # page_source = driver.page_source
-
-                # bs = BeautifulSoup(page_source, "html.parser")
-                # Check every tag's existance. If not, raise an exception.
-                # app = bs.find("div", {"id": "app"})
-                # if not app:
-                #     raise ValueError("The app tag may not exist.")
-                
-                # mainContentVideoDetail = app.find("div", {"id": "main-content-video_detail"})
-                # if not mainContentVideoDetail:
-                #     raise ValueError("The mainContentVideoDetail tag may not exist.")
-                
-                # divPlayerContainer = mainContentVideoDetail.find("div", {"class": "eqrezik4"})
-                # if not divPlayerContainer:
-                #     raise ValueError("The divPlayerContainer tag may not exist.")
-                
-                # tiktokWebPlayer = divPlayerContainer.find("div", {"class": "tiktok-web-player"})
-                # if not tiktokWebPlayer:
-                #     raise ValueError("The tiktokWebPlayer tag may not exist.")
-                
-                # videoTag = tiktokWebPlayer.find("video")
-                # if not videoTag:
-                #     raise ValueError("The videoTag may not exist.")
-                
-                # source = videoTag.find_all("source")
-                # if not source:
-                #     raise ValueError("The source tag may not exist.")
-                
-                # contentContainer = divPlayerContainer.find("div", {"class": "eqrezik17"})
-                # if not contentContainer:
-                #     raise ValueError("The contentContainer tag may not exist")
-                
-                # authorTag = contentContainer.find("div", {"class": "evv7pft3"}).find("span", {"class": "e17fzhrb1"})
-                # authorTag = contentContainer.find("span", {"class": "e17fzhrb1"})
-                # if not authorTag:
-                #     raise ValueError("The author tag may not exist.")
-                
-                # titleTag = contentContainer.find("h1", {"data-e2e": "browse-video-desc"})
-                # if not titleTag:
-                #     raise ValueError("The title tag may not exist")
-
-                # author = authorTag.text
-                # title = titleTag.text
-
-                # if source:
-                #     src = source[2].get("src")
-                # else:
-                #     src = videoTag.get("src")
-                # driver.quit()
-                # if src.startswith("https://www.tiktok.com/"):
-                #     return {
-                #         "author": author,
-                #         "title": title,
-                #         "src": src
-                #     }
-            #     limit_loop += 1
-            # except WebDriverException as e:
-            #     raise WebDriverException(e)
-            # except:
-            #     limit_loop += 1
-        # raise Exception("Unable to obtain data. The number of requests reaches the limit.")
-
-        # If the library remains stable, the program is still working.
         pyk.specify_browser("chrome")
 
         # When this line executes, it will download all its content to the path it executed.
@@ -976,15 +905,6 @@ def get_video_content(url: str, output_folder: str = None, output_file: str = No
                 except Exception as e:
                     raise Exception(f"An error occured: {e}")
             elif os.path.isfile(f"./{file}") and file.endswith(".csv"):
-                # try:
-                #     shutil.move(f"./{file}", output_folder)
-                #     csv_file_path = os.path.join(output_folder, file)
-                # except FileNotFoundError:
-                #     raise Exception(f"Could not found the file {file}.")
-                # except PermissionError:
-                #     raise Exception(f"Permission denied when moving: {file}")
-                # except Exception as e:
-                #     raise Exception(f"An error occured: {e}")
                 csv_file_path = os.path.join(".", file)
 
         if not csv_file_path or not os.path.exists(csv_file_path):
@@ -1066,27 +986,6 @@ def load_and_write(url, folder, filename):
     driver = webdriver.Chrome(service=Service("E:\ChromeDriver\chromedriver.exe"))
     driver.get(url)
 
-    # WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "video")))
-    # file_url = driver.current_url
-    # print(f"Current url: {file_url}")
-
-    # api = TikTokApi()
-    # video_bytes = api.video(url=url).bytes()
-    # time.sleep(5)
-    # page_source = driver.page_source
-
-    # bs = BeautifulSoup(page_source, "html.parser")
-    # videoSrc = bs.find("video").find("source").get("src")
-    # res = requests.get(videoSrc, stream=True, allow_redirects=True)
-    # with requests.get(file_url, stream=True) as response:
-    #     response.raise_for_status()
-        # with open(path, "wb") as destination:
-        #     for chunk in response.iter_content(chunk_size=8192):
-        #         if chunk:
-        #             print("Writing...")
-        #             destination.write(chunk)
-        #     print("Writing complete.")
-
     video_element = driver.find_element(By.TAG_NAME, "video")
     video_src = video_element.get_attribute("src")
     if not video_src:
@@ -1157,3 +1056,105 @@ def update_article_comment_number(request, articleId):
 def get_not_found_page(request, exception):
     return render(request, '404_not_found.html', status=status.HTTP_404_NOT_FOUND)
 
+def login(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+
+            user = authenticate(request, username=username, password=password)
+
+            if user:
+                login(request, user)
+                return redirect("/")
+            else:
+                form.add_error('username_or_email', 'Invalid username or password.')
+    else:
+        form = LoginForm()
+
+    return render(
+        request,
+        'auth_config.html',
+        {
+            'form': form,
+            'action': 'login'
+        }
+    )
+    
+def signup(request):
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("/")
+        else:
+            form.add_error(None, 'Something went wrong registering account.')
+    else:
+        form = SignupForm()
+
+    return render(
+        request,
+        'auth_config.html',
+        {
+            'form': form,
+            'action': 'signup'
+        }
+    )
+
+class CustomPasswordResetView(PasswordResetView):
+    email_template_name = 'auth_config.html'
+    extra_context = {
+        'action': 'reset_password'
+    }
+    success_url = "/resetPassword/done"
+
+    def form_valid(self, form):
+        return super().form_valid(form)
+    
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'auth_config.html'
+    extra_context = {
+        'action': 'reset_password_done'
+    }
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'auth_config.html'
+    extra_context = {
+        'action': 'reset_password_confirm'
+    }
+    success_url = "/resetPassword/complete"
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'auth_config.html'
+    extra_context = {
+        'action': 'reset_password_complete'
+    }
+
+@login_required
+def update_profile(request, *args, **kwargs):
+    user = request.user
+    if request.method == 'POST':
+        form = CustomUserChangeForm(request.POST, instance=user)
+        if form.is_valid():
+            user = form.save(commit=False)
+            new_password = form.cleaned_data.get("password")
+
+            if new_password:
+                user.set_password(new_password)
+                user.save()
+                update_session_auth_hash(request, user)
+            if form.cleaned_data.get("username") and form.cleaned_data.get("username") != user.username:
+                user.username = form.cleaned_data.get("username")
+            if form.cleaned_data.get("email") and form.cleaned_data.get("email") != user.email:
+                user.email = form.cleaned_data.get("email")
+            user.save()
+            messages.success(request, "Profile updated successfully.")
+            return redirect('profile')
+    else:
+        form = CustomUserChangeForm(instance=user)
+
+@login_required
+def profile(request, *args, **kwargs):
+    user = request.user

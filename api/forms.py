@@ -1,7 +1,21 @@
 from django import forms
 from django.utils import timezone
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.core.exceptions import ValidationError
 from .models import CustomUser
+import re
+
+def validate_password(value):
+    if len(value) < 8:
+        raise ValidationError("Password must have at least 8 characters.")
+    if not re.search(r'\d', value):
+        raise ValidationError("Password must have at least 1 number.")
+    if not re.search(r'[A - Z]', value):
+        raise ValidationError("Password must have at least 1 uppercase letter.")
+    
+def validate_username(value):
+    if not re.search(r'^[a-zA-Z][a-zA-Z0-9_]*$', value):
+        raise ValidationError("Username should never contain the symbols except underscores.")
 
 class FileUploadForm(forms.Form):
     CHOICES = [
@@ -239,3 +253,154 @@ class ArticleUploadFromWithUrl(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["url"].label = "URL:"
+
+class SignupForm(forms.Form):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label="Username:",
+        validators=[validate_username]
+    )
+
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control'}),
+        label="Email:"
+    )
+
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label="Password:",
+        validators=[validate_password]
+    )
+
+    retype_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label="Retype password:"
+    )
+
+    def clean_password(self):
+        password = self.cleaned_data.get("password")
+        password_confirm = self.cleaned_data.get("retype_password")
+
+        if password != password_confirm:
+            raise ValidationError("Password don't match.")
+        
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if CustomUser.objects.filter(email=email).exclude(id=self.instance.id).exists():
+            raise ValidationError("Email already taken.")
+        
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        if CustomUser.objects.filter(username=username).exclude(id=self.instance.id).exists():
+            raise ValidationError("Username already taken.")
+        
+    def save(self):
+        username = self.cleaned_data.get("username")
+        email = self.cleaned_data.get("email")
+        password = self.cleaned_data.get("password")
+
+        user = CustomUser.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+
+        return user
+    
+class LoginForm(forms.Form):
+    username_or_email = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label="Username:"
+    )
+
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label="Password:"
+    )
+
+class GetEmailForm(forms.Form):
+    email = forms.EmailField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label="Enter your email:"
+    )
+
+class ResetPasswordForm(forms.Form):
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label="Password:",
+        validators=[validate_password]
+    )
+
+    retype_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label="Retype password:"
+    )
+
+    def clean_password(self):
+        password = self.cleaned_data.get("password")
+        password_confirm = self.cleaned_data.get("retype_password")
+
+        if password != password_confirm:
+            raise ValidationError("Password don't match.")
+        
+class CustomUserChangeForm(UserChangeForm):
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Leave blank to keep the same'
+        }),
+        label='Change Email:',
+        required=False,
+    )
+
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Leave blank to keep the same'
+        }),
+        label='Change Username:',
+        required=False
+    )
+
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Leave blank to keep the same'
+        }),
+        label="Change password:",
+        required=False,
+        validators=[validate_password]
+    )
+
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Retype your password'
+        }),
+        label="Reenter password:",
+        required=False
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = ["username", 'email', 'password']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirmed_password = cleaned_data.get("confirm_password")
+
+        if password and password != confirmed_password:
+            raise ValidationError("Passwords don't match.")
+        
+        return cleaned_data
+    
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if CustomUser.objects.filter(email=email).exclude(id=self.instance.id).exists():
+            raise ValidationError("Email already taken.")
+        
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        if CustomUser.objects.filter(username=username).exclude(id=self.instance.id).exists():
+            raise ValidationError("Username already taken.")

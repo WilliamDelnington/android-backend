@@ -147,6 +147,41 @@ urlpatterns = [
         views.fetch_file, 
         name='load-test-page'
         ),
+    path(
+        'login',
+        views.login,
+        name='login'
+        ),
+    path(
+        'signup',
+        views.signup,
+        name='signup'
+        ),
+    path(
+        'resetPassword',
+        views.CustomPasswordResetView.as_view(),
+        name='reset-password'
+        ),
+    path(
+        'resetPassword/done',
+        views.CustomPasswordResetDoneView.as_view(),
+        name='reset-password-done'
+        ),
+    path(
+        'resetPassword/reset/<uidb64>/<token>',
+        views.CustomPasswordResetConfirmView.as_view(),
+        name='reset-password-confirm'
+        ),
+    path(
+        'resetPassword/complete',
+        views.CustomPasswordResetCompleteView.as_view(),
+        name='reset-password-complete'
+        ),
+    path(
+        'profile',
+        views.profile,
+        name='profile'
+        )
 ]
 
 handler404 = views.get_not_found_page

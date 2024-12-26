@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% if action == "signup" %}
+    <!-- {% if error %}
+    <div class="error-message">
+        {{ error }}
+    </div>
+    {% endif %}
+    <form method="POST">
+        <div class="form-action">
+            <label for="username">Username:</label>
+            <input type="text" name="username" placeholder="Enter username...">
+        </div>
+        <div class="form-action">
+            <label for="email">Email:</label>
+            <input type="text" name="email" placeholder="Enter email...">
+        </div>
+        <div class="form-action">
+            <label for="password">Password:</label>
+            <input type="password" name="password" placeholder="Enter password...">
+        </div>
+        <div class="form-action">
+            <label for="reenter_password">Reenter Password:</label>
+            <input type="password" name="reenter_password" placeholder="Reenter password...">
+        </div>
+        <input type="submit" value="Sign Up">
+    </form> -->
+    <form action="signup" method="post">
+        {% csrf_token %}
+        {{ form.as_div }}
+        <input type="submit" value="Sign Up">
+    </form>
+    {% else if action == 'login' %}
+    <!-- {% if error %}
+    <div class="error-message">
+        {{ error }}
+    </div>
+    {% endif %}
+    <form method="post">
+        <div class="form-action">
+            <label for="username_or_email">Username or email:</label>
+            <input type="text" name="username_or_email" placeholder="Enter username or email...">
+        </div>
+        <div class="form-action">
+            <label for="password">Password:</label>
+            <input type="password" name="password" placeholder="Enter password...">
+        </div>
+        <input type="submit" value="Login">
+    </form> -->
+    <form action="login" method="post">
+        {% csrf_token %}
+        {{ form.as_div }}
+        <input type="submit" value="Login">
+    </form>
+    {% else if action == 'reset_password' %}
+    <!-- {% if error %}
+    <div class="error-message">
+        {{ error }}
+    </div>
+    {% endif %}
+    <form method="post">
+        <div class="form-action">
+            <label for="email">Enter email:</label>
+        </div>
+        <input type="submit" value="Reset Password">
+    </form> -->
+    <form action="set_forgot_password_email" method="post">
+        {% csrf_token %}
+        {{ form.as_div }}
+        <input type="submit" value="Get Email">
+    </form>
+    {% else if action == 'reset_password_confirm' %}
+    <!-- {% if error %}
+    <div class="error-message">
+        {{ error }}
+    </div>
+    {% endif %}
+    <form method="post">
+        <h5>Reset password for {{ data.email }}</h5>
+        <div class="form-action">
+            <label for="password">Password:</label>
+            <input type="password" name="password" placeholder="Enter new password...">
+        </div>
+        <div class="form-action">
+            <label for="reenter_password">Password:</label>
+            <input type="password" name="reenter_password" placeholder="Reenter new password...">
+        </div>
+        <input type="submit" value="Reset Password">
+    </form> -->
+    <form method="post" action="reset_password">
+        {% csrf_token %}
+        {{ form.as_div }}
+        <input type="submit" value="Reset Password">
+    </form>
+    {% else if action == 'update_profile' %}
+    <h4>Update Profile:</h4>
+    <form method="post">
+        <div class="form-action">
+            <label for="username">Username:</label>
+            <input type="text" name="username" value="{{ userdata.username }}" placeholder="Enter username...">
+        </div>
+        <div class="form-action">
+            <label for="email">Email:</label>
+            <input type="text" name="email" value="{{ userdata.email }}" placeholder="Enter email...">
+        </div>
+        <div class="form-action">
+            <label for="password">Password:</label>
+            <input type="password" name="password" value="{{ userdata.password }}" placeholder="Enter password...">
+        </div>
+        <div class="form-action">
+            <label for="reenter_password">Reenter Password:</label>
+            <input type="password" name="reenter_password" value="{{ userdata.password }}" placeholder="Reenter password...">
+        </div>
+        <input type="submit" value="Update Profile">
+    </form>
+    {% else if action == 'reset_password_done' %}
+    <h4>Email verify complete.</h4>
+
+    <h5>A mail has sent to your inbox. Please check your inbox for further instructions.</h5>
+    {% else if action == 'reset_password_complete' %}
+    <h2>Reset password complete.</h2>
+
+    <h5>You can now return to the site. <a href="/">Go Homepage.</a></h5>
+    {% endif %}
+</body>
+</html>
