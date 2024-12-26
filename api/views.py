@@ -503,39 +503,53 @@ def upload_to_google_drive(request, *args, **kwargs):
     if request.method == "POST":
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            uploaded_file = request.FILES['files']
+            video_uploaded_file = request.FILES['file_one']
+            thumbnail_image_file = request.FILES['file_two']
             videoBrandType = form.cleaned_data.get("videoBrandType", None)
             author = form.cleaned_data.get('author', None)
             title = form.cleaned_data.get('title', None)
-            file_path = os.path.join(settings.MEDIA_ROOT, uploaded_file.name)
+            video_file_path = os.path.join(settings.MEDIA_ROOT, video_uploaded_file.name)
+            thumbnail_image_path = os.path.join(settings.IMAGE_DIR, thumbnail_image_file.name)
 
             # Save the file into temporary path
-            with open(file_path, 'wb+') as destination:
-                for chunk in uploaded_file.chunks():
+            with open(video_file_path, 'wb+') as destination:
+                for chunk in video_uploaded_file.chunks():
+                    destination.write(chunk)
+
+            with open(thumbnail_image_path, 'wb+') as destination:
+                for chunk in thumbnail_image_file.chunks():
                     destination.write(chunk)
 
             # Upload to Google Drive
             try:
-                file_id = upload_file(file_path, uploaded_file.name)
+                video_file_id = upload_file(video_file_path, video_uploaded_file.name)
+                image_file_id = upload_file(thumbnail_image_path, thumbnail_image_file.name)
             except Exception as e:
                 message = f"An error occured: {e}"
             finally:
-                url = f"https://drive.google.com/file/d/{file_id}/view"
-                os.remove(file_path)
+                video_url = f"https://drive.google.com/file/d/{video_file_id}/view"
+                video_fetchable_url = f"https://drive.google.com/uc?export=download?id={video_file_id}"
+                image_url = f"https://drive.google.com/file/d/{image_file_id}/view"
+                image_fetchable_url = f"https://drive.google.com/uc?export=download?id={image_file_id}"
+                os.remove(video_file_path)
+                os.remove(thumbnail_image_path)
 
-                if file_id:
+                if video_file_id:
                     try:
                         video = Video.objects.create(
-                            videoUniqueId=file_id,
+                            videoUniqueId=video_file_id,
                             videoBrandType=videoBrandType,
                             author=author,
                             title=title,
-                            url=url
+                            url=video_url,
+                            fetchable_url=video_fetchable_url,
+                            thumbnailImageUrl=image_url,
+                            thumbnailImageFetchableUrl=image_fetchable_url
                         )
                         message = f"File uploaded successfully: {video.id}, {video.videoUniqueId}"
                     except Exception as e:
                         print(e)
-                        return delete_file(request, file_id)
+                        return delete_file(request, [video_file_id, image_file_id])
                 else:
                     message = "File upload was not succeed."
 
@@ -575,13 +589,13 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
         form = FileUploadFormWithUrl(request.POST, request.FILES)
         if form.is_valid():
             message = ""
-            file_path = None # The file path that stores videos temporarily.
+            video_file_path = None
+            image_file_path = None # The file path that stores videos temporarily.
             videoContent = None # The stored data value
             if "get_data" in request.POST:
                 url = form.cleaned_data.get("URL")
                 try:
                     videoContent = get_video_content(url, settings.MEDIA_ROOT, "tempvideo.mp4")
-                    file_path = os.path.join(settings.MEDIA_ROOT, "tempvideo.mp4")
                     if videoContent.get("csv_file", None):
                         csv_file = videoContent.pop("csv_file")
                         # os.remove(csv_file)
@@ -608,10 +622,11 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
                         }
                     )
             elif 'upload' in request.POST:
-                file_path = os.path.join(settings.MEDIA_ROOT, "tempvideo.mp4")
+                video_file_path = os.path.join(settings.MEDIA_ROOT, "tempvideo.mp4")
+                image_file_path = os.path.join(settings.IMAGE_DIR, "thumbnail.jpg")
                 with open("temp.txt", "r") as file:
                     videoContent = json.load(file)
-                if not videoContent or not os.path.exists(file_path):
+                if not videoContent or not (os.path.exists(video_file_path) ):
                     end = time.time()
                     return render(
                         request,
@@ -624,31 +639,41 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
                     )
                 videoBrandType = form.cleaned_data.get("videoBrandType", None)
                 try:
-                    file_id = upload_file(file_path, "tempvideo.mp4")
+                    video_file_id = upload_file(video_file_path, "tempvideo.mp4")
+                    image_file_id = upload_file(image_file_path, "thumbnail.jpg") if os.path.exists(image_file_path) else None
                 except Exception as e:
                     message = f"An error occured while uploading file: {e}"
                 finally:
-                    url = f"https://drive.google.com/file/{file_id}/view"
-                    os.remove(file_path)
+                    video_view_url = f"https://drive.google.com/file/d/{video_file_id}/view"
+                    video_fetchable_url = f"https://drive.google.com/uc?export=download?id={video_file_id}"
+                    image_view_url = f"https://drive.google.com/file/d/{image_file_id}/view" if image_file_id else None
+                    image_fetchable_url = f"https://drive.google.com/uc?export=download?id={image_file_id}" if image_file_id else None
+                    os.remove(video_file_path)
+                    os.remove(image_file_path)
 
-                    if file_id:
+                    if video_file_id:
                         message = f"Brand type: {videoBrandType}, title: {videoContent.get('title', '')}, author: {videoContent.get('author', '')}"  
                         try:
                             video = Video.objects.create(
-                                videoUniqueId=file_id,
+                                videoUniqueId=video_file_id,
                                 videoBrandType=videoBrandType,
                                 author=videoContent["author"],
                                 title=videoContent["title"],
-                                url=url,
-                                fetchable_url=f'https://drive.google.com/uc?export=download?id={file_id}'
+                                url=video_view_url,
+                                fetchable_url=video_fetchable_url,
+                                thumbnailImageUrl=image_view_url,
+                                thumbnailImageFetchableUrl=image_fetchable_url
                             )
                             message = f"Video uploaded successfully: {video.id} - {video.videoUniqueId}"
                         except Exception as e:
-                            return delete_file(request, file_id, e + message)
+                            return delete_file(request, [video_file_id, image_file_id], e + message)
             elif 'reset' in request.POST:
-                file_path = os.path.join(settings.MEDIA_ROOT, "tempvideo.mp4")
-                if os.path.exists(file_path):
-                    os.remove(file_path)
+                video_file_path = os.path.join(settings.MEDIA_ROOT, "tempvideo.mp4")
+                image_file_path = os.path.join(settings.IMAGE_DIR, "thumbnail.jpg")
+                if os.path.exists(video_file_path):
+                    os.remove(video_file_path)
+                if os.path.exists(image_file_path):
+                    os.remove(image_file_path)
                 return render(
                     request,
                     'upload_form.html',
@@ -795,18 +820,23 @@ def get_file(request, id):
         }
     )
 
-def delete_file(request, id, message=None):
+def delete_file(request, ids: list, message=None, model=Video):
 
     """
     Delete the video files from database and Google Drive existance.
+
+    For ids parameter, set the file id in the first position.
+    For example, if you want to delete a video but it contains another file as well,
+    type [video_id, ...]
     """
 
     start = time.time()
     try:
+        for id in ids:
         # Delete file from Google Drive
-        file = delete_specific_file(id)
+            file = delete_specific_file(id)
         # Delete file from database
-        Video.objects.get(videoUniqueId=id).delete()
+        model.objects.get(videoUniqueId=ids[0]).delete()
         if not message:
             message = f"File deleted successfully: {file}"
     except Video.DoesNotExist:
@@ -967,6 +997,7 @@ def get_video_content(url: str, output_folder: str = None, output_file: str = No
             "author": author,
             "title": title,
             "src": url,
+            "thumbnail_url": None,
             "csv_file": csv_file_path
         }
 
@@ -988,21 +1019,42 @@ def get_video_content(url: str, output_folder: str = None, output_file: str = No
             #     "title": title,
             #     "src": url
             # }
-            ydl_opts = {
-                "outtmpl": os.path.join(output_folder, output_file),
-                "format": "mp4/best"
+            
+            video_opts = {
+                'format': 'mp4/best',
+                "outtmpl": os.path.join(output_folder, output_file)
             }
 
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            thumbnail_opts = {
+                'skip_download': True,
+                'write_thumbnail': True,
+                "outtmpl": os.path.join(settings.IMAGE_DIR, "thumbnail.jpg"),
+                'postprocessors': [
+                    {
+                        "key": 'FFmpegThumbnailsConvertor',
+                        'format': "jpg"
+                    }
+                ]
+            }
+
+            with yt_dlp.YoutubeDL({}) as ydl:
                 info_dict = ydl.extract_info(url, download=True)
 
                 title = info_dict.get("title", None)
                 author = info_dict.get("uploader", None)
+                thumbnail_url = info_dict.get("thumbnail", None)
+
+            with yt_dlp.YoutubeDL(video_opts) as ydl:
+                ydl.download([url])
+
+            with yt_dlp.YoutubeDL(thumbnail_opts) as ydl:
+                ydl.download([url])
 
                 return {
                     "author": author,
                     "title": title,
-                    "src": url
+                    "src": url,
+                    "thumbnail_url": thumbnail_url
                 }
 
         except Exception as e:

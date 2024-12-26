@@ -30,6 +30,8 @@ SECRET_KEY = 'django-insecure-tg-^ysty6(*bklb60mdu54fb6c3+r4824dgm-3*=z53bm3rge)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'Videos')
 MEDIA_URL = '/Videos/'
 
+IMAGE_DIR = os.path.join(BASE_DIR, 'Images')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 

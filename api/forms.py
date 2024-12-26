@@ -19,7 +19,9 @@ class FileUploadForm(forms.Form):
         choices=CHOICES,
         widget=forms.Select(attrs={
             'class': 'form-control',
-        }))
+        }),
+        label="Video Brand Type:"
+        )
     
     author = forms.CharField(
         max_length=200,
@@ -27,26 +29,45 @@ class FileUploadForm(forms.Form):
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': "Enter file's author"
-        }))
+        }),
+        label="Author:"
+        )
     
     title = forms.CharField(
         required=False, 
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': "Enter file's title"
-        }))
+        }),
+        label="Title:"
+        )
     
     createdTime = forms.DateTimeField(
         required=False,
         widget=forms.DateTimeInput(attrs={
-            'class': 'form-control'
-        }))
+            'class': 'form-control',
+        }),
+        input_formats=['%Y-%m-%dT%H:%M'],
+        label="Created Time:"
+        )
     
-    files = forms.FileField(
+    videoFiles = forms.FileField(
         required=True,
-        widget=forms.FileInput(attrs={
-            'class': 'form-control'
-        }))
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control',
+            'accept': 'video/mp4, video/mpeg, video.ogg'
+        }),
+        label='Video File: '
+        )
+    
+    thumbnailImageFiles = forms.FileField(
+        required=True,
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control',
+            'accept': 'image/jpeg, image/png, image/webp'
+        }),
+        label="Thumbnail Image File:"
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
