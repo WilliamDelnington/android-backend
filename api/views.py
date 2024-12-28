@@ -10,7 +10,7 @@ from django.contrib import messages
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, BasePermission
 
 from .models import Article, Video, ArticleComment, VideoComment, SearchHistory, CustomUser
 from .serializer import *
@@ -83,25 +83,44 @@ class ArticleList(APIView):
         "/ArticleList?originKey=max&contentKey=dashing"
         """
 
-        origin_keyword = request.query_params.get("originKey", "")
+        source = request.query_params.get("source", "")
+        vidType = request.query_params.get("type", "")
         content_keyword = request.query_params.get("contentKey", "")
 
-        if origin_keyword and content_keyword:
+        if all(source, vidType, content_keyword):
             # Return all articles that contains both needed keywords.
             articles = Article.objects.filter(
-                (Q(sourceName__icontains=origin_keyword) | 
-                 Q(articleBrandType__icontains=origin_keyword)) &
+                Q(sourceName__icontains=source) & 
+                 Q(articleBrandType__contains=vidType) &
                 (Q(title__icontains=content_keyword) | 
                  Q(description__icontains=content_keyword) | 
                  Q(content__icontains=content_keyword))
             )
-        elif origin_keyword:
+        elif all(source, vidType):
             # Return all articles that contains keywords in source name or brand type.
             articles = Article.objects.filter(
-                Q(sourceName__icontains=origin_keyword) | 
-                Q(articleBrandType__icontains=origin_keyword))
-        elif content_keyword:
+                Q(sourceName__icontains=source) &
+                Q(articleBrandType__icontains=vidType))
+        elif all(source, content_keyword):
             # Return all articles that contains keywords in article's content.
+            articles = Article.objects.filter(
+                Q(sourceName__icontains=source) &
+                (Q(title__icontains=content_keyword) |
+                Q(description__icontains=content_keyword) |
+                Q(content__icontains=content_keyword))
+            )
+        elif all(vidType, content_keyword):
+            articles = Article.objects.filter(
+                Q(vidType__contains=vidType) &
+                (Q(title__icontains=content_keyword) |
+                Q(description__icontains=content_keyword) |
+                Q(content__icontains=content_keyword))
+            )
+        elif source:
+            articles = Article.objects.filter(sourceName__icontains=source)
+        elif vidType:
+            articles = Article.objects.filter(vidType__contains=vidType)
+        elif content_keyword:
             articles = Article.objects.filter(
                 Q(title__icontains=content_keyword) |
                 Q(description__icontains=content_keyword) |
@@ -169,14 +188,14 @@ class VideoList(APIView):
         if origin_keyword and content_keyword:
             # Get all the objects that contain both keywords.
             video = Video.objects.filter(
-                (Q(videoBrandType__icontains=origin_keyword) |
+                (Q(videoBrandType__contains=origin_keyword) |
                 Q(author__icontains=origin_keyword)) & 
                 (Q(title__icontains=content_keyword))
             )
         elif origin_keyword:
             # Get all the video objects which author or brand type contains the keyword,.
             video = Video.objects.filter(
-                Q(videoBrandType__icontains=origin_keyword) |
+                Q(videoBrandType__contains=origin_keyword) |
                 Q(author__icontains=origin_keyword)
             )
         elif content_keyword:

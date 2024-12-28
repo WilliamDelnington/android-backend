@@ -74,5 +74,22 @@ def setup_url_images(url, videoId):
     else:
         print("No object returned")
 
+def setup_fetchable_urls():
+    try:
+        videos = Video.objects.all()
+        for video in videos:
+            id = video.videoUniqueId
+            thumbnailImageFetchableUrl = video.thumbnailImageFetchableUrl
+            imageId = thumbnailImageFetchableUrl.split("=")[-1].split("/")[-1]
+            video.thumbnailImageFetchableUrl = f'fetch/{imageId}'
+            video.fetchable_url = f'fetch/{id}'
+            video.thumbnailImageId = imageId
+            video.save(update_fields=["fetchable_url", "thumbnailImageFetchableUrl", "thumbnailImageId"])
+            print(f"Update {id} successfully.")
+
+        print("Update successfully.")
+    except Exception as e:
+        print(e)
+
 if __name__ == "__main__":
-    setup_url_images("https://www.youtube.com/watch?v=v6jb6PP4APc", 27)
+    setup_fetchable_urls()

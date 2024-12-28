@@ -59,6 +59,7 @@ class Article(models.Model):
 class Video(models.Model):
   id = models.BigAutoField(primary_key=True)
   videoUniqueId = models.CharField(default=None, max_length=100, unique=True)
+  thumbnailImageId = models.CharField(default=None, max_length=100, null=True)
   videoBrandType = models.CharField(max_length=30, null=True)
   author = models.CharField(max_length=200, null=True)
   title = models.TextField(null=True)
