@@ -10,7 +10,7 @@ from django.contrib import messages
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
-from rest_framework.permissions import IsAdminUser, BasePermission
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 from .models import Article, Video, ArticleComment, VideoComment, SearchHistory, CustomUser
 from .serializer import *
@@ -52,6 +52,11 @@ class ArticleListCreate(generics.ListCreateAPIView):
 
         Article.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser]
+        return super().get_permissions()
 
 
 class ArticleRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
@@ -63,6 +68,13 @@ class ArticleRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     lookup_field = "pk"
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser]
+        elif self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated]
+        return super().get_permissions()
 
 
 class ArticleList(APIView):
@@ -152,6 +164,11 @@ class VideoListCreate(generics.ListCreateAPIView):
 
         Video.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser]
+        return super().get_permissions()
 
 
 class VideoRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
@@ -163,6 +180,13 @@ class VideoRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
     lookup_field = "pk"
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser]
+        elif self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated]
+        return super().get_permissions()
 
 
 class VideoList(APIView):
@@ -246,6 +270,11 @@ class ArticleCommentListCreate(generics.ListCreateAPIView):
 
         ArticleComment.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser]
+        return super().get_permissions()
 
 
 class ArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
@@ -257,6 +286,13 @@ class ArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
     queryset = ArticleComment.objects.all()
     serializer_class = ArticleCommentSerializer
     lookup_field = "pk"
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser]
+        elif self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated]
+        return super().get_permissions()
 
 
 class ArticleCommentList(APIView):
@@ -304,6 +340,11 @@ class VideoCommentListCreate(generics.ListCreateAPIView):
 
         VideoComment.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser]
+        return super().get_permissions()
 
 
 class VideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
@@ -315,6 +356,13 @@ class VideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = VideoComment.objects.all()
     serializer_class = VideoCommentSerializer
     lookup_field = "pk"
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser]
+        elif self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated]
+        return super().get_permissions()
 
 
 class VideoCommentList(APIView):
@@ -363,7 +411,10 @@ class SearchHistoryCreate(generics.ListCreateAPIView):
         SearchHistory.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-    permission_classes = [IsAdminUser]
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser]
+        return super().get_permissions()
     
 
 class SearchHistoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
@@ -376,7 +427,12 @@ class SearchHistoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SearchHistorySerializer
     lookup_field = "pk"
 
-    permission_classes = [IsAdminUser]
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser]
+        elif self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated]
+        return super().get_permissions()
 
 
 class SearchHistoryList(APIView):
@@ -422,6 +478,11 @@ class UserListCreate(generics.ListCreateAPIView):
         CustomUser.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser]
+        return super().get_permissions()
+    
 
 class UserRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
@@ -432,6 +493,13 @@ class UserRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     lookup_field = "pk"
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser]
+        elif self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated]
+        return super().get_permissions()
 
 
 class UserList(APIView):
