@@ -93,6 +93,21 @@ urlpatterns = [
         name='list-article-comments'
         ),
     path(
+        "articleComments/temporary",
+        views.TemporaryArticleCommentListCreate.as_view(),
+        name="create-temporary-article-comments"
+        ),
+    path(
+        "articleComments/temporary/<int:pk>",
+        views.TemporaryArticleCommnentRetrieveUpdateDestroy.as_view(),
+        name="update-temporary-article-comments"
+        ),
+    path(
+        "articleComments/temporary/search",
+        views.TemporaryArticleCommentList.as_view(),
+        name="list-temporary-article-comments"
+        ),
+    path(
         'videoComments',
         views.VideoCommentListCreate.as_view(), 
         name='create-video-comments'
@@ -106,6 +121,21 @@ urlpatterns = [
         'videoComments/search',
         views.VideoCommentList.as_view(), 
         name='list-video-comments'
+        ),
+    path(
+        "videoComments/temporary",
+        views.TemporaryVideoCommentListCreate.as_view(),
+        name='create-temporary-video-comments'
+        ),
+    path(
+        "videoComments/temporary/<int:pk>",
+        views.TemporaryVideoCommentRetrieveUpdateDestroy.as_view(),
+        name='update-temporary-video-comments'
+        ),
+    path(
+        "videoComments/temporary/search",
+        views.TemporaryVideoCommentList.as_view(),
+        name='list-temporary-video-comments'
         ),
     path(
         'searchHistory', 
@@ -123,6 +153,16 @@ urlpatterns = [
         name='list-search-history'
         ),
     path(
+        "searchHistory/temporary",
+        views.TemporarySearchHistoryCreate.as_view(),
+        name="create-temporary-search-history"
+        ),
+    path(
+        "searchHistory/temporary/<int:pk>",
+        views.TemporarySearchHistoryRetrieveUpdateDestroy.as_view(),
+        name='update-temporary-search-history'
+        ),
+    path(
         'users',
         views.UserListCreate.as_view(),
         name='create-users'
@@ -136,6 +176,16 @@ urlpatterns = [
         'users/register', 
         views.UserList.as_view(),
         name='get-users'
+        ),
+    path(
+        'users/temporary',
+        views.TemporaryUserListCreate.as_view(),
+        name='list-temporary-users'
+        ),
+    path(
+        "users/temporary/<int:pk>",
+        views.TemporaryUserRetrieveUpdateDestroy.as_view(),
+        name='update-temporary-users'
         ),
     path(
         'register',

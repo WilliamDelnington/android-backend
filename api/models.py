@@ -87,3 +87,27 @@ class VideoComment(models.Model):
   user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False, db_column='user')
   createdTime = models.DateTimeField(null=False, auto_now_add=True)
   likeNum = models.IntegerField(null=False, default=0)
+
+class TemporaryUser(models.Model):
+   username = models.CharField(max_length=100)
+
+class TemporarySearchHistory(models.Model):
+    user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, related_name='search_histories')
+    searchValue = models.CharField(max_length=255)
+    searchDate = models.DateTimeField(auto_now_add=True)
+
+class TemporaryArticleComment(models.Model):
+  id = models.BigAutoField(primary_key=True, null=False)
+  content = models.TextField(null=True)
+  parentId = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+  articleId = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
+  user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False, db_column='user')
+  createdTime = models.DateTimeField(null=False, auto_now_add=True)
+
+class TemporaryVideoComment(models.Model):
+  id = models.BigAutoField(primary_key=True, null=False)
+  content = models.TextField(null=True)
+  parentId = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+  videoId = models.ForeignKey(Video, on_delete=models.CASCADE, null=False)
+  user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False, db_column='user')
+  createdTime = models.DateTimeField(null=False, auto_now_add=True)

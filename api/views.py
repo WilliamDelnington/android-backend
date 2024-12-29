@@ -170,7 +170,6 @@ class VideoListCreate(generics.ListCreateAPIView):
             return [IsAdminUser()]
         return super().get_permissions()
 
-
 class VideoRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     """
@@ -575,6 +574,191 @@ class RegisterView(generics.CreateAPIView):
             status=status.HTTP_201_CREATED
         )
     
+class TemporaryUserListCreate(generics.ListCreateAPIView):
+    queryset = TemporaryUser.objects.all()
+    serializer_class = TemporaryUserSerializer
+
+class TemporaryUserRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = TemporaryUser.objects.all()
+    serializer_class = TemporaryUserSerializer
+    lookup_field = "pk"
+
+class TemporarySearchHistoryCreate(generics.ListCreateAPIView):
+
+    """
+    A view that get all users search histories or delete all search histories at once.
+    """
+
+    queryset = TemporarySearchHistory.objects.all()
+    serializer_class = TemporarySearchHistorySerializer
+
+    def delete(self, request, *args, **kwargs):
+
+        """
+        A delete request that delete all search history objects at once.
+        """
+
+        TemporarySearchHistory.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser()]
+        return super().get_permissions()
+    
+class TemporarySearchHistoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
+    """
+    A view for modifying (updating, deleting) search histories data and get the data using id.
+    """
+
+    queryset = TemporarySearchHistory.objects.all()
+    serializer_class = TemporarySearchHistorySerializer
+    lookup_field = "pk"
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser()]
+        elif self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated()]
+        return super().get_permissions()
+    
+class TemporaryVideoCommentListCreate(generics.ListCreateAPIView):
+
+    """
+    A view that get all video comments or delete all video comments at once.
+    """
+
+    queryset = TemporaryVideoComment.objects.all()
+    serializer_class = TemporaryVideoCommentSerializer
+
+    def delete(self, request, *args, **kwargs):
+
+        """
+        A delete request that delete all video comment objects at once.
+        """
+
+        VideoComment.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser()]
+        return super().get_permissions()
+
+
+class TemporaryVideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
+    """
+    A view for modifying (updating, deleting) video comments data and get the data using id.
+    """
+
+    queryset = TemporaryVideoComment.objects.all()
+    serializer_class = TemporaryVideoCommentSerializer
+    lookup_field = "pk"
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser()]
+        elif self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated()]
+        return super().get_permissions()
+    
+class TemporaryVideoCommentList(APIView):
+
+    """
+    A view that get all specific video comments using keyword.
+    """
+
+    def get(self, request, format=None):
+
+        """
+        A get request that get all specific article comments using keywords.
+
+        For example, when you set the view path as "/VideoCommentList", to get all the video comments
+        that has keyword "max" in content, use "/VideoCommentList?keyword=max".
+        """
+
+        key = request.query_params.get("keyword", "")
+
+        if key:
+            # Return all objects which content contains the keyword.
+            videoComments = TemporaryVideoComment.objects.filter(content__icontains=key)
+        else:
+            # If no filters are used, return all objects.
+            videoComments = TemporaryVideoComment.objects.all()
+
+        serializer = VideoCommentSerializer(videoComments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class TemporaryArticleCommentListCreate(generics.ListCreateAPIView):
+
+    """
+    A view that get all article comments or delete all article comments data.
+    """
+
+    queryset = TemporaryArticleComment.objects.all()
+    serializer_class = TemporaryArticleCommentSerializer
+
+    def delete(self, request, *args, **kwargs):
+
+        """
+        A delete request that delete all article comment objects at once.
+        """
+
+        ArticleComment.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser()]
+        return super().get_permissions()
+
+
+class TemporaryArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
+    """
+    A view for modifying (updating, deleting) article comments data and get the data using id.
+    """
+
+    queryset = TemporaryArticleComment.objects.all()
+    serializer_class = TemporaryArticleCommentSerializer
+    lookup_field = "pk"
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser()]
+        elif self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated()]
+        return super().get_permissions()
+    
+class TemporaryArticleCommentList(APIView):
+
+    """
+    A view that get all specific article comments using keyword.
+    """
+
+    def get(self, request, format=None):
+
+        """
+        A get request that get all specific article comments using keywords.
+
+        For example, when you set the view path as "/ArticleCommentList", to get all the article comments
+        that has keyword "max" in content, use "/ArticleCommentList?keyword=max".
+        """
+
+        key = request.query_params.get("keyword", "")
+
+        if key:
+            # Return all objects which content contains the keyword.
+            articleComments = TemporaryArticleComment.objects.filter(content__icontains=key)
+        else:
+            # If no filters are used, return all objects.
+            articleComments = TemporaryArticleComment.objects.all()
+
+        serializer = TemporaryArticleCommentSerializer(articleComments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 def get_home(request, *args, **kwargs):
     return render(request, 'index.html', {})
 

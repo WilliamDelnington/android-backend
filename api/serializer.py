@@ -53,3 +53,23 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data['username']
         )
         return user
+    
+class TemporaryUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemporaryUser
+        fields = '__all__'
+
+class TemporarySearchHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemporarySearchHistory
+        fields = '__all__'
+
+class TemporaryArticleCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemporaryArticleComment
+        fields = '__all__'
+
+class TemporaryVideoCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemporaryVideoComment
+        fields = '__all__'
