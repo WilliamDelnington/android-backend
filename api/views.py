@@ -55,7 +55,7 @@ class ArticleListCreate(generics.ListCreateAPIView):
     
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            return [IsAdminUser]
+            return [IsAdminUser()]
         return super().get_permissions()
 
 
@@ -71,9 +71,9 @@ class ArticleRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            return [IsAdminUser]
+            return [IsAdminUser()]
         elif self.request.method in ["PUT", "PATCH"]:
-            return [IsAuthenticated]
+            return [IsAuthenticated()]
         return super().get_permissions()
 
 
@@ -167,7 +167,7 @@ class VideoListCreate(generics.ListCreateAPIView):
     
     def get_permissions(self):
         if self.request.method == "DELETE":
-            return [IsAdminUser]
+            return [IsAdminUser()]
         return super().get_permissions()
 
 
@@ -183,9 +183,9 @@ class VideoRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            return [IsAdminUser]
+            return [IsAdminUser()]
         elif self.request.method in ["PUT", "PATCH"]:
-            return [IsAuthenticated]
+            return [IsAuthenticated()]
         return super().get_permissions()
 
 
@@ -273,7 +273,7 @@ class ArticleCommentListCreate(generics.ListCreateAPIView):
     
     def get_permissions(self):
         if self.request.method == "DELETE":
-            return [IsAdminUser]
+            return [IsAdminUser()]
         return super().get_permissions()
 
 
@@ -289,9 +289,9 @@ class ArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            return [IsAdminUser]
+            return [IsAdminUser()]
         elif self.request.method in ["PUT", "PATCH"]:
-            return [IsAuthenticated]
+            return [IsAuthenticated()]
         return super().get_permissions()
 
 
@@ -343,7 +343,7 @@ class VideoCommentListCreate(generics.ListCreateAPIView):
     
     def get_permissions(self):
         if self.request.method == "DELETE":
-            return [IsAdminUser]
+            return [IsAdminUser()]
         return super().get_permissions()
 
 
@@ -359,9 +359,9 @@ class VideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            return [IsAdminUser]
+            return [IsAdminUser()]
         elif self.request.method in ["PUT", "PATCH"]:
-            return [IsAuthenticated]
+            return [IsAuthenticated()]
         return super().get_permissions()
 
 
@@ -413,7 +413,7 @@ class SearchHistoryCreate(generics.ListCreateAPIView):
     
     def get_permissions(self):
         if self.request.method == "DELETE":
-            return [IsAdminUser]
+            return [IsAdminUser()]
         return super().get_permissions()
     
 
@@ -429,9 +429,9 @@ class SearchHistoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            return [IsAdminUser]
+            return [IsAdminUser()]
         elif self.request.method in ["PUT", "PATCH"]:
-            return [IsAuthenticated]
+            return [IsAuthenticated()]
         return super().get_permissions()
 
 
@@ -480,7 +480,7 @@ class UserListCreate(generics.ListCreateAPIView):
     
     def get_permissions(self):
         if self.request.method == "DELETE":
-            return [IsAdminUser]
+            return [IsAdminUser()]
         return super().get_permissions()
     
 
@@ -496,9 +496,9 @@ class UserRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            return [IsAdminUser]
+            return [IsAdminUser()]
         elif self.request.method in ["PUT", "PATCH"]:
-            return [IsAuthenticated]
+            return [IsAuthenticated()]
         return super().get_permissions()
 
 
