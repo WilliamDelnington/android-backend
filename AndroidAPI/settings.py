@@ -33,7 +33,7 @@ MEDIA_URL = '/Videos/'
 IMAGE_DIR = os.path.join(BASE_DIR, 'Images')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG")
+DEBUG = os.environ.get("DEBUG", False) == True
 
 ALLOWED_HOSTS = [
     '*'
