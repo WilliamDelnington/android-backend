@@ -88,6 +88,16 @@ class VideoComment(models.Model):
   createdTime = models.DateTimeField(null=False, auto_now_add=True)
   likeNum = models.IntegerField(null=False, default=0)
 
+class ArticleReaction(models.Model):
+   id = models.BigAutoField(primary_key=True, null=False)
+   user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False)
+   articleId = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
+
+class VideoReaction(models.Model):
+   id = models.BigAutoField(primary_key=True, null=False)
+   user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False)
+   videoId = models.ForeignKey(Video, on_delete=models.CASCADE, null=False)
+
 class TemporaryUser(models.Model):
    username = models.CharField(max_length=100)
 
@@ -111,3 +121,14 @@ class TemporaryVideoComment(models.Model):
   videoId = models.ForeignKey(Video, on_delete=models.CASCADE, null=False)
   user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False, db_column='user')
   createdTime = models.DateTimeField(null=False, auto_now_add=True)
+
+class TemporaryArticleReaction(models.Model):
+   id = models.BigAutoField(primary_key=True, null=False)
+   user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False)
+   articleId = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
+
+class TemporaryVideoReaction(models.Model):
+   id = models.BigAutoField(primary_key=True, null=False)
+   user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False)
+   videoId = models.ForeignKey(Video, on_delete=models.CASCADE, null=False)
+

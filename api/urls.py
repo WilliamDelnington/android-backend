@@ -33,6 +33,66 @@ urlpatterns = [
         name="update-article-comment-number"
         ),
     path(
+        'articles/comments', 
+        views.ArticleCommentListCreate.as_view(), 
+        name='create-article-comments'
+        ),
+    path(
+        'articles/comments/<int:pk>', 
+        views.ArticleCommnentRetrieveUpdateDestroy.as_view(), 
+        name='update-article-comments'
+        ),
+    path(
+        'articles/comments/search', 
+        views.ArticleCommentList.as_view(), 
+        name='list-article-comments'
+        ),
+    path(
+        "articles/comments/temporary",
+        views.TemporaryArticleCommentListCreate.as_view(),
+        name="create-temporary-article-comments"
+        ),
+    path(
+        "articles/comments/temporary/<int:pk>",
+        views.TemporaryArticleCommnentRetrieveUpdateDestroy.as_view(),
+        name="update-temporary-article-comments"
+        ),
+    path(
+        "articles/comments/temporary/search",
+        views.TemporaryArticleCommentList.as_view(),
+        name="list-temporary-article-comments"
+        ),
+    path(
+        "articles/reactions",
+        views.ArticleReactionListCreate.as_view(),
+        name="create-article-reactions"
+        ),
+    path(
+        "articles/reactions/<int:pk>",
+        views.ArticleReactionRetrieveUpdateDestroy.as_view(),
+        name="update-article-reactions"
+        ),
+    path(
+        "articles/reactions/search",
+        views.ArticleReactionList.as_view(),
+        name="list-article-reactions"
+        ),
+    path(
+        "articles/reactions/temporary",
+        views.TemporaryArticleReactionListCreate.as_view(),
+        name="create-temporary-article-reactions"
+        ),
+    path(
+        "articles/reactions/temporary/<int:pk>",
+        views.TemporaryArticleReactionRetrieveUpdateDestroy.as_view(),
+        name="update-temporary-article-reactions"
+        ),
+    path(
+        "articles/reactions/temporary/search",
+        views.TemporaryArticleReactionList.as_view(),
+        name="list-temporary-article-reactions"
+        ),
+    path(
         'videos', 
         views.VideoListCreate.as_view(), 
         name='create-video'
@@ -78,64 +138,64 @@ urlpatterns = [
         name='delete-file'
         ),
     path(
-        'articleComments', 
-        views.ArticleCommentListCreate.as_view(), 
-        name='create-article-comments'
-        ),
-    path(
-        'articleComments/<int:pk>', 
-        views.ArticleCommnentRetrieveUpdateDestroy.as_view(), 
-        name='update-article-comments'
-        ),
-    path(
-        'articleComments/search', 
-        views.ArticleCommentList.as_view(), 
-        name='list-article-comments'
-        ),
-    path(
-        "articleComments/temporary",
-        views.TemporaryArticleCommentListCreate.as_view(),
-        name="create-temporary-article-comments"
-        ),
-    path(
-        "articleComments/temporary/<int:pk>",
-        views.TemporaryArticleCommnentRetrieveUpdateDestroy.as_view(),
-        name="update-temporary-article-comments"
-        ),
-    path(
-        "articleComments/temporary/search",
-        views.TemporaryArticleCommentList.as_view(),
-        name="list-temporary-article-comments"
-        ),
-    path(
-        'videoComments',
+        'videos/comments',
         views.VideoCommentListCreate.as_view(), 
         name='create-video-comments'
         ),
     path(
-        'videoComments/<int:pk>',
+        'videos/comments/<int:pk>',
         views.VideoCommentRetrieveUpdateDestroy.as_view(),
         name='update-video-comments'
         ),
     path(
-        'videoComments/search',
+        'videos/comments/search',
         views.VideoCommentList.as_view(), 
         name='list-video-comments'
         ),
     path(
-        "videoComments/temporary",
+        "videos/comments/temporary",
         views.TemporaryVideoCommentListCreate.as_view(),
         name='create-temporary-video-comments'
         ),
     path(
-        "videoComments/temporary/<int:pk>",
+        "videos/comments/temporary/<int:pk>",
         views.TemporaryVideoCommentRetrieveUpdateDestroy.as_view(),
         name='update-temporary-video-comments'
         ),
     path(
-        "videoComments/temporary/search",
+        "videos/comments/temporary/search",
         views.TemporaryVideoCommentList.as_view(),
         name='list-temporary-video-comments'
+        ),
+    path(
+        "videos/reactions",
+        views.VideoReactionListCreate.as_view(),
+        name="create-video-reactions"
+        ),
+    path(
+        "videos/reactions/<int:pk>",
+        views.VideoReactionRetrieveUpdateDestroy.as_view(),
+        name="update-video-reactions"
+        ),
+    path(
+        "videos/reactions/search",
+        views.VideoReactionList.as_view(),
+        name="list-video-reactions"
+        ),
+    path(
+        "videos/reactions/temporary",
+        views.TemporaryVideoReactionListCreate.as_view(),
+        name="create-temporary-video-reactions"
+        ),
+    path(
+        "videos/reactions/temporary/<int:pk>",
+        views.TemporaryVideoReactionRetrieveUpdateDestroy.as_view(),
+        name="update-temporary-video-reactions"
+        ),
+    path(
+        "videos/reactions/temporary/search",
+        views.TemporaryVideoReactionList.as_view(),
+        name="list-temporary-video-reactions"
         ),
     path(
         'searchHistory', 

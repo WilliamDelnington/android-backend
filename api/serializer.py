@@ -21,6 +21,16 @@ class VideoCommentSerializer(serializers.ModelSerializer):
         model = VideoComment
         fields = '__all__'
 
+class ArticleReactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArticleReaction
+        fields = '__all__'
+
+class VideoReactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VideoReaction
+        fields = '__all__'
+
 class SearchHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchHistory
@@ -72,4 +82,14 @@ class TemporaryArticleCommentSerializer(serializers.ModelSerializer):
 class TemporaryVideoCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = TemporaryVideoComment
+        fields = '__all__'
+
+class TemporaryArticleReactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemporaryArticleReaction
+        fields = '__all__'
+
+class TemporaryVideoReactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemporaryVideoReaction
         fields = '__all__'

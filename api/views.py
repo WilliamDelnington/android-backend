@@ -309,14 +309,25 @@ class ArticleCommentList(APIView):
         that has keyword "max" in content, use "/ArticleCommentList?keyword=max".
         """
 
-        key = request.query_params.get("keyword", "")
+        key = request.query_params.get("key", None)
+        user = request.query_params.get("user", None)
+        articleId = request.query_params.get("articleId", None)
+
+        filters = Q()
 
         if key:
+            filters &= Q(content__icontains=key)
+        if user:
+            filters &= Q(user__contains=user)
+        if articleId:
+            filters &= Q(articleId__contains=articleId)
+
+        if any(key, user, articleId):
             # Return all objects which content contains the keyword.
-            articleComments = ArticleComment.objects.filter(content__icontains=key)
+            articleComments = VideoComment.objects.filter(filters)
         else:
             # If no filters are used, return all objects.
-            articleComments = ArticleComment.objects.all()
+            articleComments = VideoComment.objects.all()
 
         serializer = ArticleCommentSerializer(articleComments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -379,11 +390,22 @@ class VideoCommentList(APIView):
         that has keyword "max" in content, use "/VideoCommentList?keyword=max".
         """
 
-        key = request.query_params.get("keyword", "")
+        key = request.query_params.get("key", None)
+        user = request.query_params.get("user", None)
+        videoId = request.query_params.get("videoId", None)
+
+        filters = Q()
 
         if key:
+            filters &= Q(content__icontains=key)
+        if user:
+            filters &= Q(user__contains=user)
+        if videoId:
+            filters &= Q(videoId__contains=videoId)
+
+        if any(key, user, videoId):
             # Return all objects which content contains the keyword.
-            videoComments = VideoComment.objects.filter(content__icontains=key)
+            videoComments = VideoComment.objects.filter(filters)
         else:
             # If no filters are used, return all objects.
             videoComments = VideoComment.objects.all()
@@ -391,6 +413,155 @@ class VideoCommentList(APIView):
         serializer = VideoCommentSerializer(videoComments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+class ArticleReactionListCreate(generics.ListCreateAPIView):
+
+    """
+    A view that get all article comments or delete all article comments data.
+    """
+
+    queryset = ArticleReaction.objects.all()
+    serializer_class = ArticleReactionSerializer
+
+    def delete(self, request, *args, **kwargs):
+
+        """
+        A delete request that delete all article comment objects at once.
+        """
+
+        ArticleReaction.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser()]
+        return super().get_permissions()
+    
+class ArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
+    """
+    A view for modifying (updating, deleting) article comments data and get the data using id.
+    """
+
+    queryset = ArticleReaction.objects.all()
+    serializer_class = ArticleReactionSerializer
+    lookup_field = "pk"
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser()]
+        elif self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated()]
+        return super().get_permissions()
+    
+class ArticleReactionList(APIView):
+
+    """
+    A view that get all specific article comments using keyword.
+    """
+
+    def get(self, request, format=None):
+
+        """
+        A get request that get all specific article comments using keywords.
+
+        For example, when you set the view path as "/ArticleCommentList", to get all the article comments
+        that has keyword "max" in content, use "/ArticleCommentList?keyword=max".
+        """
+
+        user = request.query_params.get("user", None)
+        articleId = request.query_params.get("articleId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user__contains=user)
+        if articleId:
+            filters &= Q(articleId__contains=articleId)
+
+        if any(user, articleId):
+            # Return all objects which content contains the keyword.
+            articleReactions = ArticleReaction.objects.filter(filters)
+        else:
+            # If no filters are used, return all objects.
+            articleReactions = ArticleReaction.objects.all()
+
+        serializer = ArticleReactionSerializer(articleReactions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class VideoReactionListCreate(generics.ListCreateAPIView):
+
+    """
+    A view that get all video comments or delete all video comments at once.
+    """
+
+    queryset = VideoReaction.objects.all()
+    serializer_class = VideoReactionSerializer
+
+    def delete(self, request, *args, **kwargs):
+
+        """
+        A delete request that delete all video comment objects at once.
+        """
+
+        VideoReaction.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser()]
+        return super().get_permissions()
+    
+class VideoReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
+    """
+    A view for modifying (updating, deleting) video comments data and get the data using id.
+    """
+
+    queryset = VideoReaction.objects.all()
+    serializer_class = VideoReactionSerializer
+    lookup_field = "pk"
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser()]
+        elif self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated()]
+        return super().get_permissions()
+    
+class VideoReactionList(APIView):
+
+    """
+    A view that get all specific video comments using keyword.
+    """
+
+    def get(self, request, format=None):
+
+        """
+        A get request that get all specific article comments using keywords.
+
+        For example, when you set the view path as "/VideoCommentList", to get all the video comments
+        that has keyword "max" in content, use "/VideoCommentList?keyword=max".
+        """
+
+        user = request.query_params.get("user", None)
+        videoId = request.query_params.get("videoId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user__contains=user)
+        if videoId:
+            filters &= Q(videoId__contains=videoId)
+
+        if any(user, videoId):
+            # Return all objects which content contains the keyword.
+            videoReaction = VideoReaction.objects.filter(filters)
+        else:
+            # If no filters are used, return all objects.
+            videoReaction = VideoReaction.objects.all()
+
+        serializer = VideoReactionSerializer(videoReaction, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class SearchHistoryCreate(generics.ListCreateAPIView):
 
@@ -427,9 +598,7 @@ class SearchHistoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = "pk"
 
     def get_permissions(self):
-        if self.request.method == 'DELETE':
-            return [IsAdminUser()]
-        elif self.request.method in ["PUT", "PATCH"]:
+        if self.request.method in ["PUT", "PATCH"]:
             return [IsAuthenticated()]
         return super().get_permissions()
 
@@ -449,9 +618,9 @@ class SearchHistoryList(APIView):
         that has keyword "max" in the value, use "/SearchHistoryList?keyword=max".
         """
 
-        key = request.query_params.get("keyword", "")
-        if key:
-            history = SearchHistory.objects.filter(searchValue__contains=key)
+        user = request.query_params.get("user", None)
+        if user:
+            history = SearchHistory.objects.filter(user=user)
         else:
             history = SearchHistory.objects.all()
 
@@ -617,11 +786,21 @@ class TemporarySearchHistoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroy
     lookup_field = "pk"
 
     def get_permissions(self):
-        if self.request.method == 'DELETE':
-            return [IsAdminUser()]
-        elif self.request.method in ["PUT", "PATCH"]:
+        if self.request.method in ["PUT", "PATCH"]:
             return [IsAuthenticated()]
         return super().get_permissions()
+    
+class TemporarySearchHistoryList(APIView):
+    def get(self, request, format=None):
+        user = request.query_params.get("user", None)
+
+        if user:
+            temporarySearchHistories = TemporarySearchHistory.objects.filter(user__contains=user)
+        else:
+            temporarySearchHistories = TemporarySearchHistory.objects.all()
+        
+        serializer = TemporarySearchHistorySerializer(temporarySearchHistories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
 class TemporaryVideoCommentListCreate(generics.ListCreateAPIView):
 
@@ -638,14 +817,13 @@ class TemporaryVideoCommentListCreate(generics.ListCreateAPIView):
         A delete request that delete all video comment objects at once.
         """
 
-        VideoComment.objects.all().delete()
+        TemporaryVideoComment.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     def get_permissions(self):
         if self.request.method == "DELETE":
             return [IsAdminUser()]
         return super().get_permissions()
-
 
 class TemporaryVideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
@@ -658,9 +836,7 @@ class TemporaryVideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyA
     lookup_field = "pk"
 
     def get_permissions(self):
-        if self.request.method == 'DELETE':
-            return [IsAdminUser()]
-        elif self.request.method in ["PUT", "PATCH"]:
+        if self.request.method in ["PUT", "PATCH"]:
             return [IsAuthenticated()]
         return super().get_permissions()
     
@@ -679,16 +855,27 @@ class TemporaryVideoCommentList(APIView):
         that has keyword "max" in content, use "/VideoCommentList?keyword=max".
         """
 
-        key = request.query_params.get("keyword", "")
+        key = request.query_params.get("key", None)
+        user = request.query_params.get("user", None)
+        videoId = request.query_params.get("videoId", None)
+
+        filters = Q()
 
         if key:
+            filters &= Q(content__icontains=key)
+        if user:
+            filters &= Q(user__contains=user)
+        if videoId:
+            filters &= Q(videoId__contains=videoId)
+
+        if any(key, user, videoId):
             # Return all objects which content contains the keyword.
-            videoComments = TemporaryVideoComment.objects.filter(content__icontains=key)
+            temporaryVideoComments = TemporaryVideoComment.objects.filter(filters)
         else:
             # If no filters are used, return all objects.
-            videoComments = TemporaryVideoComment.objects.all()
+            temporaryVideoComments = TemporaryVideoComment.objects.all()
 
-        serializer = VideoCommentSerializer(videoComments, many=True)
+        serializer = TemporaryVideoCommentSerializer(temporaryVideoComments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class TemporaryArticleCommentListCreate(generics.ListCreateAPIView):
@@ -706,14 +893,13 @@ class TemporaryArticleCommentListCreate(generics.ListCreateAPIView):
         A delete request that delete all article comment objects at once.
         """
 
-        ArticleComment.objects.all().delete()
+        TemporaryArticleComment.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     def get_permissions(self):
         if self.request.method == "DELETE":
             return [IsAdminUser()]
         return super().get_permissions()
-
 
 class TemporaryArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
@@ -726,9 +912,7 @@ class TemporaryArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestr
     lookup_field = "pk"
 
     def get_permissions(self):
-        if self.request.method == 'DELETE':
-            return [IsAdminUser()]
-        elif self.request.method in ["PUT", "PATCH"]:
+        if self.request.method in ["PUT", "PATCH"]:
             return [IsAuthenticated()]
         return super().get_permissions()
     
@@ -747,16 +931,173 @@ class TemporaryArticleCommentList(APIView):
         that has keyword "max" in content, use "/ArticleCommentList?keyword=max".
         """
 
-        key = request.query_params.get("keyword", "")
+        key = request.query_params.get("key", None)
+        user = request.query_params.get("user", None)
+        articleId = request.query_params.get("articleId", None)
+
+        filters = Q()
 
         if key:
+            filters &= Q(content__icontains=key)
+        if user:
+            filters &= Q(user__contains=user)
+        if articleId:
+            filters &= Q(articleId__contains=articleId)
+
+        if any(key, user, articleId):
             # Return all objects which content contains the keyword.
-            articleComments = TemporaryArticleComment.objects.filter(content__icontains=key)
+            temporaryArticleComments = TemporaryArticleComment.objects.filter(filters)
         else:
             # If no filters are used, return all objects.
-            articleComments = TemporaryArticleComment.objects.all()
+            temporaryArticleComments = TemporaryArticleComment.objects.all()
 
-        serializer = TemporaryArticleCommentSerializer(articleComments, many=True)
+        serializer = TemporaryArticleCommentSerializer(temporaryArticleComments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class TemporaryArticleReactionListCreate(generics.ListCreateAPIView):
+
+    """
+    A view that get all article comments or delete all article comments data.
+    """
+
+    queryset = TemporaryArticleReaction.objects.all()
+    serializer_class = TemporaryArticleReactionSerializer
+
+    def delete(self, request, *args, **kwargs):
+
+        """
+        A delete request that delete all article comment objects at once.
+        """
+
+        ArticleComment.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser()]
+        return super().get_permissions()
+    
+class TemporaryArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
+    """
+    A view for modifying (updating, deleting) article comments data and get the data using id.
+    """
+
+    queryset = TemporaryArticleReaction.objects.all()
+    serializer_class = TemporaryArticleReactionSerializer
+    lookup_field = "pk"
+
+    def get_permissions(self):
+        if self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated()]
+        return super().get_permissions()
+    
+class TemporaryArticleReactionList(APIView):
+
+    """
+    A view that get all specific article comments using keyword.
+    """
+
+    def get(self, request, format=None):
+
+        """
+        A get request that get all specific article reactions using keywords.
+
+        For example, when you set the view path as "/", to get all the article comments
+        that has keyword "max" in content, use "/ArticleCommentList?keyword=max".
+        """
+
+        user = request.query_params.get("user", None)
+        articleId = request.query_params.get("articleId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user__contains=user)
+        if articleId:
+            filters &= Q(articleId__contains=articleId)
+
+        if any(user, articleId):
+            # Return all objects which content contains the keyword.
+            temporaryArticleReactions = TemporaryArticleReaction.objects.filter(filters)
+        else:
+            # If no filters are used, return all objects.
+            temporaryArticleReactions = TemporaryArticleReaction.objects.all()
+
+        serializer = TemporaryArticleReactionSerializer(temporaryArticleReactions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class TemporaryVideoReactionListCreate(generics.ListCreateAPIView):
+
+    """
+    A view that get all video comments or delete all video comments at once.
+    """
+
+    queryset = TemporaryVideoReaction.objects.all()
+    serializer_class = TemporaryVideoReactionSerializer
+
+    def delete(self, request, *args, **kwargs):
+
+        """
+        A delete request that delete all video comment objects at once.
+        """
+
+        TemporaryVideoReaction.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser()]
+        return super().get_permissions()
+    
+class TemporaryVideoReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
+    """
+    A view for modifying (updating, deleting) video comments data and get the data using id.
+    """
+
+    queryset = TemporaryVideoReaction.objects.all()
+    serializer_class = TemporaryVideoReactionSerializer
+    lookup_field = "pk"
+
+    def get_permissions(self):
+        if self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated()]
+        return super().get_permissions()
+    
+class TemporaryVideoReactionList(APIView):
+
+    """
+    A view that get all specific video comments using keyword.
+    """
+
+    def get(self, request, format=None):
+
+        """
+        A get request that get all specific article comments using keywords.
+
+        For example, when you set the view path as "/VideoCommentList", to get all the video comments
+        that has keyword "max" in content, use "/VideoCommentList?keyword=max".
+        """
+
+        user = request.query_params.get("user", None)
+        videoId = request.query_params.get("videoId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user__contains=user)
+        if videoId:
+            filters &= Q(videoId__contains=videoId)
+
+        if any(user, videoId):
+            # Return all objects which content contains the keyword.
+            temporaryVideoReactions = TemporaryVideoReaction.objects.filter(filters)
+        else:
+            # If no filters are used, return all objects.
+            temporaryVideoReactions = TemporaryVideoReaction.objects.all()
+
+        serializer = TemporaryVideoReactionSerializer(temporaryVideoReactions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 def get_home(request, *args, **kwargs):
@@ -941,7 +1282,7 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
                             )
                             message = f"Video uploaded successfully: {video.id} - {video.videoUniqueId}"
                         except Exception as e:
-                            return delete_file(request, [video_file_id, image_file_id], e + message)
+                            return delete_file(request, video_file_id, e + message)
             elif 'reset' in request.POST:
                 video_file_path = os.path.join(settings.MEDIA_ROOT, "tempvideo.mp4")
                 image_file_path = os.path.join(settings.IMAGE_DIR, "thumbnail.jpg")
@@ -1095,7 +1436,7 @@ def get_file(request, id):
         }
     )
 
-def delete_file(request, ids: list, message=None, model=Video):
+def delete_file(request, id: str, message=None, model=Video):
 
     """
     Delete the video files from database and Google Drive existance.
@@ -1107,13 +1448,15 @@ def delete_file(request, ids: list, message=None, model=Video):
 
     start = time.time()
     try:
-        for id in ids:
+        video = model.objects.get(videoUniqueId=id)
+        thumbnailImage = video.thumbnailImageId
         # Delete file from Google Drive
-            file = delete_specific_file(id)
+        video_file = delete_specific_file(id)
+        thumbnail_file = delete_specific_file(thumbnailImage)
         # Delete file from database
-        model.objects.get(videoUniqueId=ids[0]).delete()
+        video.delete()
         if not message:
-            message = f"File deleted successfully: {file}"
+            message = f"File deleted successfully: {video_file}"
     except Video.DoesNotExist:
         if not message:
             message = "Video does not exist in database."
