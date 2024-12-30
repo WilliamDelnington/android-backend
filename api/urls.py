@@ -28,7 +28,7 @@ urlpatterns = [
         name="upload-article-form-only-url"
         ),
     path(
-        'articles/updateComments/<str:articleId>', 
+        'articles/updateCommentNumbers/<int:articleId>', 
         views.update_article_comment_number, 
         name="update-article-comment-number"
         ),
@@ -123,7 +123,7 @@ urlpatterns = [
         name="list-files-in-google-drive"
         ),
     path(
-        'videos/updateComments/<str:videoId>', 
+        'videos/updateCommentNumber/<int:videoId>', 
         views.update_video_comment_number, 
         name="update-video-comment-number"
         ),

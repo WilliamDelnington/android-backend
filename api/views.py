@@ -270,6 +270,23 @@ class ArticleCommentListCreate(generics.ListCreateAPIView):
         ArticleComment.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    def post(self, request, *args, **kwargs):
+        """
+        A post request that both create article comment and update the article's comment number.
+        """
+
+        data = request.data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        articleId = data.get("articleId")
+        article = Article.objects.get(id=articleId)
+        article.commentNum = article.commentNum + 1 if article.commentNum else 1
+        article.save(update_fields=["commentNum"])
+
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
     def get_permissions(self):
         if self.request.method == "DELETE":
             return [IsAdminUser()]
@@ -285,6 +302,24 @@ class ArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
     queryset = ArticleComment.objects.all()
     serializer_class = ArticleCommentSerializer
     lookup_field = "pk"
+
+    def delete(self, request, *args, **kwargs):
+        """
+        A delete request that both delete the article comment and update the article's comments number.
+        """
+
+        articleComment = self.get_object()
+        id = articleComment.id
+        articleId = articleComment.articleId
+
+        article = Article.objects.get(id=articleId)
+        article.commentNum = article.commentNum - 1 if article.commentNum > 0 else 0
+        article.save(update_fields=["commentNum"])
+
+        response = super().delete(request, *args, **kwargs)
+
+        response.data = {"message": f"Article Comment {id} deleted successfully"}
+        return Response(response.data, status=status.HTTP_204_NO_CONTENT)
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
@@ -351,6 +386,24 @@ class VideoCommentListCreate(generics.ListCreateAPIView):
         VideoComment.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    def post(self, request, *args, **kwargs):
+
+        """
+        A post request that both create a video comment and update the video's comments number.
+        """
+
+        data = request.data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        videoId = data.get("videoId")
+        video = Video.objects.get(id=videoId)
+        video.commentNum = video.commentNum + 1 if video.commentNum else 0
+        video.save(update_fields=["commentNum"])
+
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
     def get_permissions(self):
         if self.request.method == "DELETE":
             return [IsAdminUser()]
@@ -366,6 +419,23 @@ class VideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = VideoComment.objects.all()
     serializer_class = VideoCommentSerializer
     lookup_field = "pk"
+
+    def delete(self, request, *args, **kwargs):
+        """
+        A delete request that both deletes the video comment and update the video's comments number.
+        """
+        videoComment = self.get_object()
+        id = videoComment.id
+        videoId = videoComment.videoId
+
+        video = Video.objects.get(id=videoId)
+        video.commentNum = video.commentNum - 1 if video.commentNum > 0 else 0
+        video.save(update_fields=["commentNum"])
+
+        response = super().delete(request, *args, **kwargs)
+
+        response.data = {"message": f"Video Comment {id} deleted successfully"}
+        return Response(response.data, status=status.HTTP_204_NO_CONTENT)
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
@@ -431,6 +501,22 @@ class ArticleReactionListCreate(generics.ListCreateAPIView):
         ArticleReaction.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    def post(self, request, *args, **kwargs):
+        """
+        A post request that create a new article reaction and update the article's reactions number.
+        """
+        data = request.data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        articleId = data.get("articleId")
+        article = Article.objects.get(id=articleId)
+        article.likeNum = article.likeNum + 1 if article.likeNum else 1
+        article.save(update_fields=["likeNum"])
+
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
     def get_permissions(self):
         if self.request.method == "DELETE":
             return [IsAdminUser()]
@@ -445,6 +531,23 @@ class ArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
     queryset = ArticleReaction.objects.all()
     serializer_class = ArticleReactionSerializer
     lookup_field = "pk"
+
+    def delete(self, request, *args, **kwargs):
+        """
+        A delete request that deletes the article reaction and update the article's reactions number.
+        """
+        articleReaction = self.get_object()
+        id = articleReaction.id
+        articleId = articleReaction.articleId
+
+        article = Article.objects.get(id=articleId)
+        article.likeNum = article.likeNum - 1 if article.likeNum > 0 else 0
+        article.save(update_fields=["likeNum"])
+
+        response = super().delete(request, *args, **kwargs)
+
+        response.data = {"message": f"Article Reaction {id} deleted successfully"}
+        return Response(response.data, status=status.HTTP_204_NO_CONTENT)
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
@@ -506,6 +609,22 @@ class VideoReactionListCreate(generics.ListCreateAPIView):
         VideoReaction.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    def post(self, request, *args, **kwargs):
+        """
+        A post request that create a video reaction and update the video's reaction number.
+        """
+        data = request.data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        videoId = data.get("videoId")
+        video = Video.objects.get(id=videoId)
+        video.likeNum = video.likeNum + 1 if video.likeNum else 1
+        video.save(update_fields=["likeNum"])
+
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
     def get_permissions(self):
         if self.request.method == "DELETE":
             return [IsAdminUser()]
@@ -520,6 +639,23 @@ class VideoReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = VideoReaction.objects.all()
     serializer_class = VideoReactionSerializer
     lookup_field = "pk"
+
+    def delete(self, request, *args, **kwargs):
+        """
+        A delete request that both deletes video reactions and updates the video's reaction number.
+        """
+        videoReaction = self.get_object()
+        id = videoReaction.id
+        videoId = videoReaction.videoId
+
+        video = Video.objects.get(id=videoId)
+        video.likeNum = video.likeNum - 1 if video.likeNum > 0 else 0
+        video.save(update_fields=["likeNum"])
+
+        response = super().delete(request, *args, **kwargs)
+
+        response.data = {"message": f"Video Reaction {id} deleted successfully"}
+        return Response(response.data, status=status.HTTP_204_NO_CONTENT)
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
@@ -820,6 +956,22 @@ class TemporaryVideoCommentListCreate(generics.ListCreateAPIView):
         TemporaryVideoComment.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    def post(self, request, *args, **kwargs):
+        """
+        A post request that create a temporary video comment and update the video's comments number
+        """
+        data = request.data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        videoId = data.get("videoId")
+        video = Video.objects.get(id=videoId)
+        video.commentNum = video.commentNum + 1 if video.commentNum else 0
+        video.save(update_fields=["commentNum"])
+
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
     def get_permissions(self):
         if self.request.method == "DELETE":
             return [IsAdminUser()]
@@ -834,6 +986,23 @@ class TemporaryVideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyA
     queryset = TemporaryVideoComment.objects.all()
     serializer_class = TemporaryVideoCommentSerializer
     lookup_field = "pk"
+    
+    def delete(self, request, *args, **kwargs):
+        """
+        A delete request that deletes the temporary video comment and updates the video's comments number.
+        """
+        temporaryVideoComment = self.get_object()
+        id = temporaryVideoComment.id
+        videoId = temporaryVideoComment.articleId
+
+        video = Video.objects.get(id=videoId)
+        video.commentNum = video.commentNum - 1 if video.commentNum > 0 else 0
+        video.save(update_fields=["commentNum"])
+
+        response = super().delete(request, *args, **kwargs)
+
+        response.data = {"message": f"Temporary Video Comment {id} deleted successfully"}
+        return Response(response.data, status=status.HTTP_204_NO_CONTENT)
 
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -896,6 +1065,22 @@ class TemporaryArticleCommentListCreate(generics.ListCreateAPIView):
         TemporaryArticleComment.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    def post(self, request, *args, **kwargs):
+        """
+        A post request that create a new temporary article comment and update article's comments number.
+        """
+        data = request.data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        articleId = data.get("articleId")
+        article = Article.objects.get(id=articleId)
+        article.commentNum = article.commentNum + 1 if article.commentNum else 1
+        article.save(update_fields=["commentNum"])
+
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
     def get_permissions(self):
         if self.request.method == "DELETE":
             return [IsAdminUser()]
@@ -910,6 +1095,23 @@ class TemporaryArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestr
     queryset = TemporaryArticleComment.objects.all()
     serializer_class = TemporaryArticleCommentSerializer
     lookup_field = "pk"
+
+    def delete(self, request, *args, **kwargs):
+        """
+        A delete request that deletes the temporary article comment and update the number of article's comments number.
+        """
+        temporaryArticleComment = self.get_object()
+        id = temporaryArticleComment.id
+        articleId = temporaryArticleComment.articleId
+
+        article = Article.objects.get(id=articleId)
+        article.commentNum = article.commentNum - 1 if article.commentNum > 0 else 0
+        article.save(update_fields=["commentNum"])
+
+        response = super().delete(request, *args, **kwargs)
+
+        response.data = {"message": f"Temporary Article Comment {id} deleted successfully"}
+        return Response(response.data, status=status.HTTP_204_NO_CONTENT)
 
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -969,8 +1171,24 @@ class TemporaryArticleReactionListCreate(generics.ListCreateAPIView):
         A delete request that delete all article comment objects at once.
         """
 
-        ArticleComment.objects.all().delete()
+        TemporaryArticleReaction.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def post(self, request, *args, **kwargs):
+        """
+        A post request that create a new temporary reaction and update article's reaction number.
+        """
+        data = request.data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        articleId = data.get("articleId")
+        article = Article.objects.get(id=articleId)
+        article.likeNum = article.likeNum + 1 if article.likeNum else 1
+        article.save(update_fields=["likeNum"])
+
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     def get_permissions(self):
         if self.request.method == "DELETE":
@@ -986,6 +1204,23 @@ class TemporaryArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestr
     queryset = TemporaryArticleReaction.objects.all()
     serializer_class = TemporaryArticleReactionSerializer
     lookup_field = "pk"
+
+    def delete(self, request, *args, **kwargs):
+        """
+        A delete request that deletes the temporary article reaction and update the article's reaction number.
+        """
+        temporaryArticleReaction = self.get_object()
+        id = temporaryArticleReaction.id
+        articleId = temporaryArticleReaction.videoId
+
+        article = Article.objects.get(id=articleId)
+        article.likeNum = article.likeNum - 1 if article.likeNum > 0 else 0
+        article.save(update_fields=["likeNum"])
+
+        response = super().delete(request, *args, **kwargs)
+
+        response.data = {"message": f"Temporart Article Reaction {id} deleted successfully"}
+        return Response(response.data, status=status.HTTP_204_NO_CONTENT)
 
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -1045,6 +1280,22 @@ class TemporaryVideoReactionListCreate(generics.ListCreateAPIView):
         TemporaryVideoReaction.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    def post(self, request, *args, **kwargs):
+        """
+        A post request that creates a new video reaction and updates video's reaction number.
+        """
+        data = request.data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        videoId = data.get("videoId")
+        video = Article.objects.get(id=videoId)
+        video.likeNum = video.likeNum + 1 if video.likeNum else 1
+        video.save(update_fields=["likeNum"])
+
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
     def get_permissions(self):
         if self.request.method == "DELETE":
             return [IsAdminUser()]
@@ -1059,6 +1310,23 @@ class TemporaryVideoReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroy
     queryset = TemporaryVideoReaction.objects.all()
     serializer_class = TemporaryVideoReactionSerializer
     lookup_field = "pk"
+
+    def delete(self, request, *args, **kwargs):
+        """
+        A delete request that deletes the temporary video reaction and update the video's reaction number.
+        """
+        temporaryVideoReaction = self.get_object()
+        id = temporaryVideoReaction.id
+        videoId = temporaryVideoReaction.videoId
+
+        video = Video.objects.get(id=videoId)
+        video.likeNum = video.likeNum - 1 if video.likeNum > 0 else 0
+        video.save(update_fields=["likeNum"]) 
+
+        response = super().delete(request, *args, **kwargs)
+
+        response.data = {"message": f"Article Comment {id} deleted successfully"}
+        return Response(response.data, status=status.HTTP_204_NO_CONTENT)
 
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH"]:

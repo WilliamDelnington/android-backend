@@ -55,6 +55,7 @@ class Article(models.Model):
   publishedAt = models.DateTimeField(null=False, default=timezone.now)
   content = models.TextField(null=True)
   commentNum = models.IntegerField(null=False, default=0)
+  likeNum = models.IntegerField(null=False, default=0)
 
 class Video(models.Model):
   id = models.BigAutoField(primary_key=True)
@@ -69,6 +70,7 @@ class Video(models.Model):
   thumbnailImageFetchableUrl = models.TextField(null=True)
   createdTime = models.DateTimeField(null=False, default=timezone.now)
   commentNum = models.IntegerField(null=False, default=0)
+  likeNum = models.IntegerField(null=False, default=0)
 
 class ArticleComment(models.Model):
   id = models.BigAutoField(primary_key=True, null=False)
