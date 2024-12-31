@@ -312,7 +312,7 @@ class ArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
         id = articleComment.id
         articleId = articleComment.articleId
 
-        article = Article.objects.get(id=articleId)
+        article = Article.objects.get(id=articleId.id)
         article.commentNum = article.commentNum - 1 if article.commentNum > 0 else 0
         article.save(update_fields=["commentNum"])
 
@@ -428,7 +428,7 @@ class VideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         id = videoComment.id
         videoId = videoComment.videoId
 
-        video = Video.objects.get(id=videoId)
+        video = Video.objects.get(id=videoId.id)
         video.commentNum = video.commentNum - 1 if video.commentNum > 0 else 0
         video.save(update_fields=["commentNum"])
 
@@ -540,7 +540,7 @@ class ArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
         id = articleReaction.id
         articleId = articleReaction.articleId
 
-        article = Article.objects.get(id=articleId)
+        article = Article.objects.get(id=articleId.id)
         article.likeNum = article.likeNum - 1 if article.likeNum > 0 else 0
         article.save(update_fields=["likeNum"])
 
@@ -648,7 +648,7 @@ class VideoReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         id = videoReaction.id
         videoId = videoReaction.videoId
 
-        video = Video.objects.get(id=videoId)
+        video = Video.objects.get(id=videoId.id)
         video.likeNum = video.likeNum - 1 if video.likeNum > 0 else 0
         video.save(update_fields=["likeNum"])
 
@@ -888,6 +888,20 @@ class TemporaryUserRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TemporaryUserSerializer
     lookup_field = "pk"
 
+class TemporaryUserGet(APIView):
+    def get(self, request, *args, **kwargs):
+        username = request.query_params.get("username")
+
+        if username:
+            try:
+                user = TemporaryUser.objects.get(username=username)
+            except:
+                return Response({"message": f"User {username} does not exist"} ,status=status.HTTP_404_NOT_FOUND)
+        else:
+            user = TemporaryUser.objects.all()
+        serializer = TemporaryUserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 class TemporarySearchHistoryCreate(generics.ListCreateAPIView):
 
     """
@@ -995,7 +1009,7 @@ class TemporaryVideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyA
         id = temporaryVideoComment.id
         videoId = temporaryVideoComment.articleId
 
-        video = Video.objects.get(id=videoId)
+        video = Video.objects.get(id=videoId.id)
         video.commentNum = video.commentNum - 1 if video.commentNum > 0 else 0
         video.save(update_fields=["commentNum"])
 
@@ -1104,7 +1118,7 @@ class TemporaryArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestr
         id = temporaryArticleComment.id
         articleId = temporaryArticleComment.articleId
 
-        article = Article.objects.get(id=articleId)
+        article = Article.objects.get(id=articleId.id)
         article.commentNum = article.commentNum - 1 if article.commentNum > 0 else 0
         article.save(update_fields=["commentNum"])
 
@@ -1213,7 +1227,7 @@ class TemporaryArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestr
         id = temporaryArticleReaction.id
         articleId = temporaryArticleReaction.videoId
 
-        article = Article.objects.get(id=articleId)
+        article = Article.objects.get(id=articleId.id)
         article.likeNum = article.likeNum - 1 if article.likeNum > 0 else 0
         article.save(update_fields=["likeNum"])
 
@@ -1289,7 +1303,7 @@ class TemporaryVideoReactionListCreate(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         videoId = data.get("videoId")
-        video = Article.objects.get(id=videoId)
+        video = Video.objects.get(id=videoId)
         video.likeNum = video.likeNum + 1 if video.likeNum else 1
         video.save(update_fields=["likeNum"])
 
@@ -1319,7 +1333,7 @@ class TemporaryVideoReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroy
         id = temporaryVideoReaction.id
         videoId = temporaryVideoReaction.videoId
 
-        video = Video.objects.get(id=videoId)
+        video = Video.objects.get(id=videoId.id)
         video.likeNum = video.likeNum - 1 if video.likeNum > 0 else 0
         video.save(update_fields=["likeNum"]) 
 

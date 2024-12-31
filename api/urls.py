@@ -240,12 +240,17 @@ urlpatterns = [
     path(
         'users/temporary',
         views.TemporaryUserListCreate.as_view(),
-        name='list-temporary-users'
+        name='create-temporary-users'
         ),
     path(
         "users/temporary/<int:pk>",
         views.TemporaryUserRetrieveUpdateDestroy.as_view(),
         name='update-temporary-users'
+        ),
+    path(
+        "users/temporary/search",
+        views.TemporaryUserGet.as_view(),
+        name="get-temporary-user"
         ),
     path(
         'register',

@@ -6,9 +6,43 @@
     <title>Document</title>
 </head>
 <body>
+    <div class="not-authed">
+        <a href="./authentication/login.html">Login</a>
+        <a href="./authentication/signup.html">Sign Up</a>
+    </div>
+    <div class="authed">
+        <p class="username"></p>
+        <button class="logout-btn">Log Out</button>
+    </div>
+    <script>
+        const notAuthedView = document.querySelector(".not-authed")
+        const authedView = document.querySelector(".authed")
+
+        const isAuthed = localStorage.getItem("is_authenticated")
+        if (isAuthed) {
+            notAuthedView.style.display = "none"
+            authedView.style.display = "block"
+        } else {
+            notAuthedView.style.display = "block"
+            authedView.style.display = "none"
+        }
+
+        const usernameLayer = document.querySelector(".username")
+        const username = localStorage.getItem("username")
+        usernameLayer.textContent = username
+
+        const logoutBtn = document.querySelector(".logout-btn")
+        logoutBtn.addEventListener("click", () => {
+            localStorage.setItem("is_authenticated", false)
+            window.location.reload()
+        })
+    </script>
     <video width="400" height="210" controls>
-        <source src="http://android-backend-tech-c52e01da23ae.herokuapp.com/fetch/1cQ9aGBz2LaHQHsJnGlGohLsb3fSNinrW">
+        <!-- <source src="http://android-backend-tech-c52e01da23ae.herokuapp.com/fetch/1cQ9aGBz2LaHQHsJnGlGohLsb3fSNinrW"> -->
         Your browser does not support video tag.
     </video>
+    <script>
+
+    </script>
 </body>
 </html>

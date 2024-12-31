@@ -101,7 +101,7 @@ class VideoReaction(models.Model):
    videoId = models.ForeignKey(Video, on_delete=models.CASCADE, null=False)
 
 class TemporaryUser(models.Model):
-   username = models.CharField(max_length=100)
+   username = models.CharField(max_length=100, unique=True)
 
 class TemporarySearchHistory(models.Model):
     user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, related_name='search_histories')
