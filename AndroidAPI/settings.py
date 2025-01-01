@@ -48,7 +48,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://drive.google.com",
     "http://127.0.2.2:5500",
     "http://127.0.2.3:5500",
-    "http://localhost:5500"
+    "http://localhost:5500",
+    "http://localhost:3000"
 ]
 
 CORS_ALLOW_METHODS = [

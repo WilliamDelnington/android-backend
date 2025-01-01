@@ -357,7 +357,7 @@ class ArticleCommentList(APIView):
         if articleId:
             filters &= Q(articleId__contains=articleId)
 
-        if any(key, user, articleId):
+        if any([key, user, articleId]):
             # Return all objects which content contains the keyword.
             articleComments = VideoComment.objects.filter(filters)
         else:
@@ -581,7 +581,7 @@ class ArticleReactionList(APIView):
         if articleId:
             filters &= Q(articleId__contains=articleId)
 
-        if any(user, articleId):
+        if any([user, articleId]):
             # Return all objects which content contains the keyword.
             articleReactions = ArticleReaction.objects.filter(filters)
         else:
@@ -689,7 +689,7 @@ class VideoReactionList(APIView):
         if videoId:
             filters &= Q(videoId__contains=videoId)
 
-        if any(user, videoId):
+        if any([user, videoId]):
             # Return all objects which content contains the keyword.
             videoReaction = VideoReaction.objects.filter(filters)
         else:
@@ -1047,11 +1047,11 @@ class TemporaryVideoCommentList(APIView):
         if key:
             filters &= Q(content__icontains=key)
         if user:
-            filters &= Q(user__contains=user)
+            filters &= Q(user=user)
         if videoId:
-            filters &= Q(videoId__contains=videoId)
+            filters &= Q(videoId=videoId)
 
-        if any(key, user, videoId):
+        if any([key, user, videoId]):
             # Return all objects which content contains the keyword.
             temporaryVideoComments = TemporaryVideoComment.objects.filter(filters)
         else:
@@ -1160,7 +1160,7 @@ class TemporaryArticleCommentList(APIView):
         if articleId:
             filters &= Q(articleId__contains=articleId)
 
-        if any(key, user, articleId):
+        if any([key, user, articleId]):
             # Return all objects which content contains the keyword.
             temporaryArticleComments = TemporaryArticleComment.objects.filter(filters)
         else:
@@ -1266,7 +1266,7 @@ class TemporaryArticleReactionList(APIView):
         if articleId:
             filters &= Q(articleId__contains=articleId)
 
-        if any(user, articleId):
+        if any([user, articleId]):
             # Return all objects which content contains the keyword.
             temporaryArticleReactions = TemporaryArticleReaction.objects.filter(filters)
         else:
@@ -1372,7 +1372,7 @@ class TemporaryVideoReactionList(APIView):
         if videoId:
             filters &= Q(videoId__contains=videoId)
 
-        if any(user, videoId):
+        if any([user, videoId]):
             # Return all objects which content contains the keyword.
             temporaryVideoReactions = TemporaryVideoReaction.objects.filter(filters)
         else:
