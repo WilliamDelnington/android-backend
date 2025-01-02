@@ -46,7 +46,6 @@ export default function VideoCommentContainer({ videoId }) {
         })
     }
 
-    console.log(commentData)
 
   return (
     <div>
@@ -55,9 +54,12 @@ export default function VideoCommentContainer({ videoId }) {
             {(!loading && commentData.length > 0) ? commentData.map((comment, key) => (
                 <VideoComment
                 key={key}
+                commentId={comment.id}
+                userId={comment.user}
                 content={comment.content} 
                 username={comment.username} 
-                createdTime={comment.createdTime}/>
+                createdTime={comment.createdTime}
+                videoId={videoId}/>
             )) : <div></div>}
         </div>
         <div style={{

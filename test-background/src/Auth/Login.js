@@ -23,9 +23,11 @@ export default function Login() {
             }
             return response.json()
         }).then(data => {
-            localStorage.setItem("is_authenticated", true)
+            localStorage.setItem("is_authenticated", "true")
             localStorage.setItem("username", username)
             localStorage.setItem("userId", data.id)
+            console.log(localStorage.getItem("username"))
+            console.log(localStorage.getItem("userId"))
             navigate("/")
         }).catch(error => {
             setErrorMessage(`Error: ${error.message}`)
@@ -43,7 +45,7 @@ export default function Login() {
                 name="username"
                 placeholder='Your username'
                 value={username}
-                onChange={setUsername} />
+                onChange={e => setUsername(e.target.value)} />
             </Form.Group>
             <Button type="submit" variant="primary">Login</Button>
         </Form>

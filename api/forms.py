@@ -69,7 +69,7 @@ class FileUploadForm(forms.Form):
         required=True,
         widget=forms.ClearableFileInput(attrs={
             'class': 'form-control',
-            'accept': 'video/mp4, video/mpeg, video.ogg'
+            'accept': 'video/mp4, video/mpeg, video.ogg',
         }),
         label='Video File: '
         )
@@ -78,7 +78,7 @@ class FileUploadForm(forms.Form):
         required=True,
         widget=forms.ClearableFileInput(attrs={
             'class': 'form-control',
-            'accept': 'image/jpeg, image/png, image/webp'
+            'accept': 'image/jpeg, image/png, image/webp',
         }),
         label="Thumbnail Image File:"
         )

@@ -3,13 +3,13 @@ import './App.css';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Signup from './Auth/Signup';
 import Login from './Auth/Login';
-import Video from './Media/Video';
+import Main from './Main';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Video videoId={6}/>} />
+        <Route path="/" element={<Main />} />
         <Route path="/signup" element={<Signup />}/>
         <Route path="/login" element={<Login />} />
       </Routes>

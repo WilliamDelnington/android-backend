@@ -109,12 +109,26 @@ class TemporarySearchHistory(models.Model):
     searchDate = models.DateTimeField(auto_now_add=True)
 
 class TemporaryArticleComment(models.Model):
-  id = models.BigAutoField(primary_key=True, null=False)
-  content = models.TextField(null=True)
-  parentId = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
-  articleId = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
-  user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False, db_column='user')
-  createdTime = models.DateTimeField(null=False, auto_now_add=True)
+   id = models.BigAutoField(primary_key=True, null=False)
+   content = models.TextField(null=True)
+   parentId = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+   articleId = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
+   user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False, db_column='user')
+   createdTime = models.DateTimeField(null=False, auto_now_add=True)
+
+   def save(self, *args, **kwargs):
+      if self.articleId:
+        self.articleId.commentNum = self.articleId.commentNum + 1 if self.articleId.commentNum else 1
+        self.articleId.save()
+
+      return super().save(*args, **kwargs)
+  
+   def delete(self, *args, **kwargs):
+      if self.articleId:
+         self.articleId.commentNum = self.articleId.commentNum - 1 if self.articleId.commentNum > 0 else 0
+         self.articleId.save()
+
+      return super().save(*args, **kwargs)
 
 class TemporaryVideoComment(models.Model):
   id = models.BigAutoField(primary_key=True, null=False)
@@ -124,13 +138,54 @@ class TemporaryVideoComment(models.Model):
   user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False, db_column='user')
   createdTime = models.DateTimeField(null=False, auto_now_add=True)
 
+  def save(self, *args, **kwargs):
+     if self.videoId:
+        self.videoId.commentNum = self.videoId.commentNum + 1 if self.videoId.commentNum else 1
+        self.videoId.save()
+
+     return super().save(*args, **kwargs)
+
+  def delete(self, *args, **kwargs):
+     if self.videoId:
+        self.videoId.commentNum = self.videoId.commentNum - 1 if self.videoId.commentNum > 0 else 0
+        self.videoId.save()
+
+     return super().delete(*args, **kwargs)
+
 class TemporaryArticleReaction(models.Model):
    id = models.BigAutoField(primary_key=True, null=False)
    user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False)
    articleId = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
+
+   def save(self, *args, **kwargs):
+      if self.articleId:
+         self.articleId.likeNum = self.articleId.likeNum + 1 if self.articleId.likeNum else 1
+         self.articleId.save()
+
+      return super().save(*args, **kwargs)
+   
+   def delete(self, *args, **kwargs):
+      if self.articleId:
+         self.articleId.likeNum = self.articleId.likeNum - 1 if self.articleId.likeNum > 0 else 0
+         self.articleId.save()
+
+      return super().save(*args, **kwargs)
 
 class TemporaryVideoReaction(models.Model):
    id = models.BigAutoField(primary_key=True, null=False)
    user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False)
    videoId = models.ForeignKey(Video, on_delete=models.CASCADE, null=False)
 
+   def save(self, *args, **kwargs):
+      if self.videoId:
+         self.videoId.likeNum = self.videoId.likeNum + 1 if self.videoId.likeNum else 1
+         self.videoId.save()
+
+      return super().save(*args, **kwargs)
+   
+   def delete(self, *args, **kwargs):
+      if self.videoId:
+         self.videoId.likeNum = self.videoId.likeNum - 1 if self.videoId.likeNum > 0 else 0
+         self.videoId.save()
+
+      return super().delete(*args, **kwargs)

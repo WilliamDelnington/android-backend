@@ -29,9 +29,11 @@ export default function Signup() {
             }
             return response.json()
         }).then(data => {
-            localStorage.setItem("is_authenticated", true)
+            localStorage.setItem("is_authenticated", "true")
             localStorage.setItem("username", username)
             localStorage.setItem("userId", data.id)
+            console.log(localStorage.getItem("username"))
+            console.log(localStorage.getItem("userId"))
             navigate("/")
         }).catch(error => {
             setErrorMessage(`Error requesting: ${error.message}`)
@@ -49,7 +51,7 @@ export default function Signup() {
                 name="username"
                 placeholder="Your username"
                 value={username}
-                onChange={setUsername}></Form.Control>
+                onChange={e => setUsername(e.target.value)}></Form.Control>
             </Form.Group>
             <Button type="submit" variant='primary'>Sign Up</Button>
         </Form>

@@ -353,9 +353,9 @@ class ArticleCommentList(APIView):
         if key:
             filters &= Q(content__icontains=key)
         if user:
-            filters &= Q(user__contains=user)
+            filters &= Q(user=user)
         if articleId:
-            filters &= Q(articleId__contains=articleId)
+            filters &= Q(articleId=articleId)
 
         if any([key, user, articleId]):
             # Return all objects which content contains the keyword.
@@ -469,9 +469,9 @@ class VideoCommentList(APIView):
         if key:
             filters &= Q(content__icontains=key)
         if user:
-            filters &= Q(user__contains=user)
+            filters &= Q(user=user)
         if videoId:
-            filters &= Q(videoId__contains=videoId)
+            filters &= Q(videoId=videoId)
 
         if any(key, user, videoId):
             # Return all objects which content contains the keyword.
@@ -577,9 +577,9 @@ class ArticleReactionList(APIView):
         filters = Q()
 
         if user:
-            filters &= Q(user__contains=user)
+            filters &= Q(user=user)
         if articleId:
-            filters &= Q(articleId__contains=articleId)
+            filters &= Q(articleId=articleId)
 
         if any([user, articleId]):
             # Return all objects which content contains the keyword.
@@ -590,6 +590,33 @@ class ArticleReactionList(APIView):
 
         serializer = ArticleReactionSerializer(articleReactions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, format=None):
+        user = request.query_params.get("user", None)
+        articleId = request.query_params.get("articleId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user=user)
+        if articleId:
+            filters &= Q(videoId=articleId)
+
+        try:
+            articleReaction = ArticleReaction.objects.get(filters)
+            articleReaction.delete()
+
+            article = Article.objects.get(id=articleId)
+            article.likeNum = article.likeNum - 1
+            article.save(update_fields=["likeNum"])
+
+            return Response({"message": "Object successfully deleted"}, status=status.HTTP_204_NO_CONTENT)
+        except ArticleReaction.DoesNotExist:
+            return Response({"message": "Object does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        except ArticleReaction.MultipleObjectsReturned:
+            return Response({"message": "Multiple objects returned"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"message": f"Error deleting reaction: {e.message}"}, status=status.HTTP_400_BAD_REQUEST)
     
 class VideoReactionListCreate(generics.ListCreateAPIView):
 
@@ -685,9 +712,9 @@ class VideoReactionList(APIView):
         filters = Q()
 
         if user:
-            filters &= Q(user__contains=user)
+            filters &= Q(user=user)
         if videoId:
-            filters &= Q(videoId__contains=videoId)
+            filters &= Q(videoId=videoId)
 
         if any([user, videoId]):
             # Return all objects which content contains the keyword.
@@ -698,6 +725,33 @@ class VideoReactionList(APIView):
 
         serializer = VideoReactionSerializer(videoReaction, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, format=None):
+        user = request.query_params.get("user", None)
+        videoId = request.query_params.get("videoId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user=user)
+        if videoId:
+            filters &= Q(videoId=videoId)
+
+        try:
+            videoReaction = VideoReaction.objects.get(filters)
+            videoReaction.delete()
+
+            video = Video.objects.get(id=videoId)
+            video.likeNum = video.likeNum - 1
+            video.save(update_fields=["likeNum"])
+
+            return Response({"message": "Object successfully deleted"}, status=status.HTTP_204_NO_CONTENT)
+        except VideoReaction.DoesNotExist:
+            return Response({"message": "Object does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        except VideoReaction.MultipleObjectsReturned:
+            return Response({"message": "Multiple objects returned"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"message": f"Error deleting reaction: {e.message}"}, status=status.HTTP_400_BAD_REQUEST)
 
 class SearchHistoryCreate(generics.ListCreateAPIView):
 
@@ -945,7 +999,7 @@ class TemporarySearchHistoryList(APIView):
         user = request.query_params.get("user", None)
 
         if user:
-            temporarySearchHistories = TemporarySearchHistory.objects.filter(user__contains=user)
+            temporarySearchHistories = TemporarySearchHistory.objects.filter(user=user)
         else:
             temporarySearchHistories = TemporarySearchHistory.objects.all()
         
@@ -1061,6 +1115,7 @@ class TemporaryVideoCommentList(APIView):
         serializer = TemporaryVideoCommentSerializer(temporaryVideoComments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+
 class TemporaryArticleCommentListCreate(generics.ListCreateAPIView):
 
     """
@@ -1156,9 +1211,9 @@ class TemporaryArticleCommentList(APIView):
         if key:
             filters &= Q(content__icontains=key)
         if user:
-            filters &= Q(user__contains=user)
+            filters &= Q(user=user)
         if articleId:
-            filters &= Q(articleId__contains=articleId)
+            filters &= Q(articleId=articleId)
 
         if any([key, user, articleId]):
             # Return all objects which content contains the keyword.
@@ -1169,6 +1224,7 @@ class TemporaryArticleCommentList(APIView):
 
         serializer = TemporaryArticleCommentSerializer(temporaryArticleComments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+        
 
 class TemporaryArticleReactionListCreate(generics.ListCreateAPIView):
 
@@ -1262,9 +1318,9 @@ class TemporaryArticleReactionList(APIView):
         filters = Q()
 
         if user:
-            filters &= Q(user__contains=user)
+            filters &= Q(user=user)
         if articleId:
-            filters &= Q(articleId__contains=articleId)
+            filters &= Q(articleId=articleId)
 
         if any([user, articleId]):
             # Return all objects which content contains the keyword.
@@ -1275,6 +1331,33 @@ class TemporaryArticleReactionList(APIView):
 
         serializer = TemporaryArticleReactionSerializer(temporaryArticleReactions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, format=None):
+        user = request.query_params.get('user', None)
+        articleId = request.query_params.get('articleId', None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user=user)
+        if articleId:
+            filters &= Q(articleId=articleId)
+
+        try:
+            temporaryArticleReaction = TemporaryArticleReaction.objects.get(filters)
+            temporaryArticleReaction.delete()
+
+            article = Article.objects.get(id=articleId)
+            article.likeNum = article.likeNum - 1
+            article.save(update_fields=["likeNum"])
+
+            return Response({"message": "Object successfully deleted"}, status=status.HTTP_204_NO_CONTENT)
+        except TemporaryArticleReaction.DoesNotExist:
+            return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+        except TemporaryArticleReaction.MultipleObjectsReturned:
+            return Response({"message": "Multiple objects returned"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"message": f"Error deleting object: {e.message}"}, status=status.HTTP_400_BAD_REQUEST)
     
 class TemporaryVideoReactionListCreate(generics.ListCreateAPIView):
 
@@ -1368,9 +1451,9 @@ class TemporaryVideoReactionList(APIView):
         filters = Q()
 
         if user:
-            filters &= Q(user__contains=user)
+            filters &= Q(user=user)
         if videoId:
-            filters &= Q(videoId__contains=videoId)
+            filters &= Q(videoId=videoId)
 
         if any([user, videoId]):
             # Return all objects which content contains the keyword.
@@ -1381,6 +1464,33 @@ class TemporaryVideoReactionList(APIView):
 
         serializer = TemporaryVideoReactionSerializer(temporaryVideoReactions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, format=None):
+        user = request.query_params.get('user', None)
+        videoId = request.query_params.get('videoId', None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user=user)
+        if videoId:
+            filters &= Q(videoId=videoId)
+
+        try:
+            temporaryVideoReaction = TemporaryVideoReaction.objects.get(filters)
+            temporaryVideoReaction.delete()
+
+            video = Video.objects.get(id=videoId)
+            video.likeNum = video.likeNum - 1
+            video.save(update_fields=["likeNum"])
+
+            return Response({"message": "Object deleted"}, status=status.HTTP_204_NO_CONTENT)
+        except TemporaryVideoReaction.DoesNotExist:
+            return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+        except TemporaryVideoReaction.MultipleObjectsReturned:
+            return Response({"message": "Multiple objects returned"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"message": f"Error deleting reaction: {e.message}"}, status=status.HTTP_400_BAD_REQUEST)
 
 def get_home(request, *args, **kwargs):
     return render(request, 'index.html', {})
@@ -1401,8 +1511,8 @@ def upload_to_google_drive(request, *args, **kwargs):
     if request.method == "POST":
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            video_uploaded_file = request.FILES['file_one']
-            thumbnail_image_file = request.FILES['file_two']
+            video_uploaded_file = request.FILES['videoFiles']
+            thumbnail_image_file = request.FILES['thumbnailImageFiles']
             videoBrandType = form.cleaned_data.get("videoBrandType", None)
             author = form.cleaned_data.get('author', None)
             title = form.cleaned_data.get('title', None)
@@ -1426,9 +1536,9 @@ def upload_to_google_drive(request, *args, **kwargs):
                 message = f"An error occured: {e}"
             finally:
                 video_url = f"https://drive.google.com/file/d/{video_file_id}/view"
-                video_fetchable_url = f"https://drive.google.com/uc?export=download?id={video_file_id}"
+                video_fetchable_url = f"fetch/{video_file_id}"
                 image_url = f"https://drive.google.com/file/d/{image_file_id}/view"
-                image_fetchable_url = f"https://drive.google.com/uc?export=download?id={image_file_id}"
+                image_fetchable_url = f"fetch/{image_file_id}"
                 os.remove(video_file_path)
                 os.remove(thumbnail_image_path)
 
@@ -1436,6 +1546,7 @@ def upload_to_google_drive(request, *args, **kwargs):
                     try:
                         video = Video.objects.create(
                             videoUniqueId=video_file_id,
+                            thumbnailImageId=image_file_id,
                             videoBrandType=videoBrandType,
                             author=author,
                             title=title,
@@ -1543,9 +1654,9 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
                     message = f"An error occured while uploading file: {e}"
                 finally:
                     video_view_url = f"https://drive.google.com/file/d/{video_file_id}/view"
-                    video_fetchable_url = f"https://drive.google.com/uc?export=download?id={video_file_id}"
+                    video_fetchable_url = f"fetch/{video_file_id}"
                     image_view_url = f"https://drive.google.com/file/d/{image_file_id}/view" if image_file_id else None
-                    image_fetchable_url = f"https://drive.google.com/uc?export=download?id={image_file_id}" if image_file_id else None
+                    image_fetchable_url = f"fetch/{image_file_id}" if image_file_id else None
                     os.remove(video_file_path)
                     os.remove(image_file_path)
 
@@ -1554,6 +1665,7 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
                         try:
                             video = Video.objects.create(
                                 videoUniqueId=video_file_id,
+                                thumbnailImageId=image_file_id,
                                 videoBrandType=videoBrandType,
                                 author=videoContent["author"],
                                 title=videoContent["title"],
