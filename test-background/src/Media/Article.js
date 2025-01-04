@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
-import VideoCommentContainer from './VideoCommentContainer'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
+import ArticleCommentContainer from './ArticleCommentContainer'
 
-export default function Video() {
+export default function Article() {
     const publicUrl = "https://android-backend-tech-c52e01da23ae.herokuapp.com/"
     const privateUrl = "http://192.168.56.1:8000/"
 
@@ -12,29 +12,26 @@ export default function Video() {
 
     const navigate = useNavigate()
 
-    const { videoId } = useParams()
+    const { articleId } = useParams()
 
-    const [videoSource, setVideoSource] = useState("")
+    if (!articleId) {
+        throw new Error("No id were specified.")
+    }
+
     const [errorMessage, setErrorMessage] = useState("")
+    const [articleLoading, setArticleLoading] = useState(true)
+    const [articleData, setArticleData] = useState({})
+
     const [comment, setComment] = useState("")
-    const [loading, setLoading] = useState(true)
     const [replyLoading, setReplyLoading] = useState(false)
-    const [isVideoLiked, setIsVideoLiked] = useState(false)
+    const [isArticleLiked, setIsArticleLiked] = useState(false)
     const [likeUnlikeLoading, setLikeUnlikeLoading] = useState(false)
-    const [videoInfo, setVideoInfo] = useState({
-        url: "",
-        fetchable_url: "",
-        thumbnailImageUrl: "",
-        createdTime: "",
-        likeNum: 0,
-        commentNum: 0
-    })
 
     useEffect(() => {
         setIsAuthenticated(localStorage.getItem("is_authenticated") === "true")
         setUsername(localStorage.getItem("username") || "")
     }, [])
-
+    
     function handleLogout(e) {
         e.preventDefault()
 
@@ -48,47 +45,52 @@ export default function Video() {
 
     useEffect(() => {
         setErrorMessage("")
-        async function fetchData() {
+        async function fetchArticleData() {
             try {
-                const res = await fetch(privateUrl + `videos/${videoId}`)
-                if (!res.ok) {
-                    throw new Error(`${res.status}`)
+                const response = await fetch(privateUrl + `articles/${articleId}`)
+                if (!response.ok) {
+                    throw new Error(response.status)
                 }
-                const data = await res.json()
-                setVideoInfo({
-                    ...videoInfo,
-                    fetchable_url: data.fetchable_url,
-                    thumbnailImageUrl: data.thumbnailImageUrl,
-                    createdTime: data.createdTime,
-                    likeNum: data.likeNum,
-                    commentNum: data.commentNum
+                const data = await response.json()
+                setArticleData({
+                    ...articleData,
+                    articleBrandType: data.articleBrandType,
+                    sourceName: data.sourceName,
+                    author: data.author,
+                    title: data.title,
+                    description: data.description,
+                    urlToImage: data.urlToImage,
+                    publishedAt: data.publishedAt,
+                    content: data.content,
+                    commentNum: data.commentNum,
+                    likeNum: data.likeNum
                 })
 
-                setVideoSource(privateUrl + data.fetchable_url)
+                console.log(data.content)
             } catch (err) {
-                setErrorMessage(`Error fetching video ${videoId}: ${err.message}`)
+                setErrorMessage("Error fetching article data: " + err.message)
             } finally {
-                setLoading(false)
+                setArticleLoading(false)
             }
         }
 
-        fetchData()
+        fetchArticleData()
     }, [])
 
     useEffect(() => {
         setErrorMessage("")
         async function getReaction() {
             try {
-                const res = await fetch(privateUrl + `videos/reactions/temporary/search?videoId=${videoId}&user=${localStorage.getItem("userId")}`)
+                const res = await fetch(privateUrl + `articles/reactions/temporary/search?videoId=${articleId}&user=${localStorage.getItem("userId")}`)
                 if (!res.ok) {
                     throw new Error(`${res.status}`)
                 }
                 const data = await res.json()
                 console.log(data)
                 if (data.length === 0) {
-                    setIsVideoLiked(false)
+                    setIsArticleLiked(false)
                 } else {
-                    setIsVideoLiked(true)
+                    setIsArticleLiked(true)
                 }
             } catch (err) {
                 setErrorMessage("Error getting reaction: " + err.message)
@@ -103,14 +105,14 @@ export default function Video() {
         setReplyLoading(true)
 
         try {
-            const response = await fetch(privateUrl + "videos/comments/temporary", {
+            const response = await fetch(privateUrl + "articles/comments/temporary", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     user: parseInt(localStorage.getItem("userId")),
-                    videoId: videoId,
+                    articleId: articleId,
                     parentId: null,
                     content: comment
                 })
@@ -131,23 +133,23 @@ export default function Video() {
         setLikeUnlikeLoading(true)
 
         try {
-           const response = await fetch(privateUrl + "videos/reactions/temporary", {
+           const response = await fetch(privateUrl + "articles/reactions/temporary", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     user: parseInt(localStorage.getItem("userId")),
-                    videoId: videoId,
+                    articleId: articleId,
                 })
             })
             if (response.status < 200 || response.status >= 300) {
                 throw new Error(response.status)
             }
             console.log(await response.json())
-            setIsVideoLiked(true)
+            setIsArticleLiked(true)
         } catch (err) {
-            setErrorMessage("Error liking video: " + err.message)
+            setErrorMessage("Error liking article: " + err.message)
         } finally {
             setLikeUnlikeLoading(false)
         }
@@ -159,7 +161,7 @@ export default function Video() {
 
         try {
             const response = await fetch(
-                privateUrl + `videos/reactions/temporary/search?videoId=${videoId}&user=${localStorage.getItem("userId")}`,
+                privateUrl + `articles/reactions/temporary/search?videoId=${articleId}&user=${localStorage.getItem("userId")}`,
                 {
                     method: "DELETE",
                     headers: {
@@ -171,13 +173,14 @@ export default function Video() {
                 throw new Error(response.status)
             }
             console.log(await response.json())
-            setIsVideoLiked(false)
+            setIsArticleLiked(false)
         } catch (err) {
-            setErrorMessage("Error unliking video: " + err.message)
+            setErrorMessage("Error unliking article: " + err.message)
         } finally {
             setLikeUnlikeLoading(false)
         }
     }
+    
 
   return (
     <>
@@ -192,21 +195,37 @@ export default function Video() {
                 <button onClick={handleLogout}>Log Out</button>
             </div>
         )}
-        <div style={{color: "red"}}>{errorMessage}</div>
-        {loading && <div>Currently Loading...</div>}
-        <video width={400} height={210} controls>
-            {videoSource ? <source src={videoSource} type='video/mp4'/> : <div>Loading...</div>}
-        </video>
+        <div style={{color:"red"}}>{errorMessage}</div>
+        {articleLoading && <div>Loading Article...</div>}
+        <article>
+            <h4 className='article-type'>Article Type: {articleData.articleBrandType}</h4>
+
+            <h4 className='article-source'>From: {articleData.sourceName}</h4>
+
+            <h1 className='article-title'>{articleData.title}</h1>
+
+            <p>By <span className='article-author' style={{fontWeight: 500}}>{articleData.author}</span></p>
+
+            <p>Published At: <time dateTime={articleData.publishedAt}>{articleData.publishedAt}</time></p>
+
+            <h2 className='article-description'>{articleData.description}</h2>
+
+            {articleData.urlToImage && <img src={articleData.urlToImage}></img>}
+
+            {articleData.content ? articleData.content.split("\n").map((co, key) => (
+                <p key={key}>{co}</p>
+            )) : <div></div>}
+        </article>
         <div className="decision-container">
-            <Button disabled={(isVideoLiked || likeUnlikeLoading || !isAuthenticated)} onClick={likeVideo}>Like Video</Button>
-            <Button disabled={(!isVideoLiked || likeUnlikeLoading || !isAuthenticated)} onClick={unlikeVideo}>Unlike Video</Button>
+            <Button disabled={(isArticleLiked || likeUnlikeLoading || !isAuthenticated)} onClick={likeVideo}>Like Article</Button>
+            <Button disabled={(!isArticleLiked || likeUnlikeLoading || !isAuthenticated)} onClick={unlikeVideo}>Unlike Article</Button>
         </div>
-        <div className="video-info-container">
-            <p>Likes: {videoInfo.likeNum}</p>
-            <p>Comments: {videoInfo.commentNum}</p>
+        <div className='article-info-container'>
+            <p>Likes: {articleData.likeNum}</p>
+            <p>Comments: {articleData.commentNum}</p>
         </div>
-        <div className="video-comments-container">
-            <Form method="POST" onSubmit={addComment} style={
+        <div className='article-comments-container'>
+            <Form method='post' onSubmit={addComment} style={
                 isAuthenticated
                 ? {display: 'block'}
                 : {display: 'none'}}>
@@ -216,10 +235,10 @@ export default function Video() {
                 name="comment_content"
                 value={comment}
                 onChange={e => setComment(e.target.value)}/>
-                <Button type="submit">Add Comment</Button>
+                <Button type='submit'>Add Comment</Button>
             </Form>
             {replyLoading && <div>Replying...</div>}
-            <VideoCommentContainer videoId={videoId} />
+            <ArticleCommentContainer articleId={articleId} />
         </div>
     </>
   )

@@ -16,7 +16,7 @@ from .models import Article, Video, ArticleComment, VideoComment, SearchHistory,
 from .serializer import *
 from .utils import upload_file, list_all_files, get_specific_file, delete_specific_file
 from .forms import *
-# from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 # from selenium.webdriver.support.ui import WebDriverWait
@@ -25,6 +25,7 @@ from selenium.webdriver.common.by import By
 # from selenium.common.exceptions import WebDriverException
 # from TikTokApi import TikTokApi
 # from pytube import YouTube
+from datetime import datetime
 import os
 import time
 import requests
@@ -279,10 +280,10 @@ class ArticleCommentListCreate(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        articleId = data.get("articleId")
-        article = Article.objects.get(id=articleId)
-        article.commentNum = article.commentNum + 1 if article.commentNum else 1
-        article.save(update_fields=["commentNum"])
+        # articleId = data.get("articleId")
+        # article = Article.objects.get(id=articleId)
+        # article.commentNum = article.commentNum + 1 if article.commentNum else 1
+        # article.save(update_fields=["commentNum"])
 
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -310,11 +311,11 @@ class ArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
 
         articleComment = self.get_object()
         id = articleComment.id
-        articleId = articleComment.articleId
+        # articleId = articleComment.articleId
 
-        article = Article.objects.get(id=articleId.id)
-        article.commentNum = article.commentNum - 1 if article.commentNum > 0 else 0
-        article.save(update_fields=["commentNum"])
+        # article = Article.objects.get(id=articleId.id)
+        # article.commentNum = article.commentNum - 1 if article.commentNum > 0 else 0
+        # article.save(update_fields=["commentNum"])
 
         response = super().delete(request, *args, **kwargs)
 
@@ -396,10 +397,10 @@ class VideoCommentListCreate(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        videoId = data.get("videoId")
-        video = Video.objects.get(id=videoId)
-        video.commentNum = video.commentNum + 1 if video.commentNum else 0
-        video.save(update_fields=["commentNum"])
+        # videoId = data.get("videoId")
+        # video = Video.objects.get(id=videoId)
+        # video.commentNum = video.commentNum + 1 if video.commentNum else 0
+        # video.save(update_fields=["commentNum"])
 
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -426,11 +427,11 @@ class VideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         """
         videoComment = self.get_object()
         id = videoComment.id
-        videoId = videoComment.videoId
+        # videoId = videoComment.videoId
 
-        video = Video.objects.get(id=videoId.id)
-        video.commentNum = video.commentNum - 1 if video.commentNum > 0 else 0
-        video.save(update_fields=["commentNum"])
+        # video = Video.objects.get(id=videoId.id)
+        # video.commentNum = video.commentNum - 1 if video.commentNum > 0 else 0
+        # video.save(update_fields=["commentNum"])
 
         response = super().delete(request, *args, **kwargs)
 
@@ -509,10 +510,10 @@ class ArticleReactionListCreate(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        articleId = data.get("articleId")
-        article = Article.objects.get(id=articleId)
-        article.likeNum = article.likeNum + 1 if article.likeNum else 1
-        article.save(update_fields=["likeNum"])
+        # articleId = data.get("articleId")
+        # article = Article.objects.get(id=articleId)
+        # article.likeNum = article.likeNum + 1 if article.likeNum else 1
+        # article.save(update_fields=["likeNum"])
 
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -537,12 +538,12 @@ class ArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
         A delete request that deletes the article reaction and update the article's reactions number.
         """
         articleReaction = self.get_object()
-        id = articleReaction.id
-        articleId = articleReaction.articleId
+        # id = articleReaction.id
+        # articleId = articleReaction.articleId
 
-        article = Article.objects.get(id=articleId.id)
-        article.likeNum = article.likeNum - 1 if article.likeNum > 0 else 0
-        article.save(update_fields=["likeNum"])
+        # article = Article.objects.get(id=articleId.id)
+        # article.likeNum = article.likeNum - 1 if article.likeNum > 0 else 0
+        # article.save(update_fields=["likeNum"])
 
         response = super().delete(request, *args, **kwargs)
 
@@ -606,9 +607,9 @@ class ArticleReactionList(APIView):
             articleReaction = ArticleReaction.objects.get(filters)
             articleReaction.delete()
 
-            article = Article.objects.get(id=articleId)
-            article.likeNum = article.likeNum - 1
-            article.save(update_fields=["likeNum"])
+            # article = Article.objects.get(id=articleId)
+            # article.likeNum = article.likeNum - 1
+            # article.save(update_fields=["likeNum"])
 
             return Response({"message": "Object successfully deleted"}, status=status.HTTP_204_NO_CONTENT)
         except ArticleReaction.DoesNotExist:
@@ -644,10 +645,10 @@ class VideoReactionListCreate(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        videoId = data.get("videoId")
-        video = Video.objects.get(id=videoId)
-        video.likeNum = video.likeNum + 1 if video.likeNum else 1
-        video.save(update_fields=["likeNum"])
+        # videoId = data.get("videoId")
+        # video = Video.objects.get(id=videoId)
+        # video.likeNum = video.likeNum + 1 if video.likeNum else 1
+        # video.save(update_fields=["likeNum"])
 
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -673,11 +674,11 @@ class VideoReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         """
         videoReaction = self.get_object()
         id = videoReaction.id
-        videoId = videoReaction.videoId
+        # videoId = videoReaction.videoId
 
-        video = Video.objects.get(id=videoId.id)
-        video.likeNum = video.likeNum - 1 if video.likeNum > 0 else 0
-        video.save(update_fields=["likeNum"])
+        # video = Video.objects.get(id=videoId.id)
+        # video.likeNum = video.likeNum - 1 if video.likeNum > 0 else 0
+        # video.save(update_fields=["likeNum"])
 
         response = super().delete(request, *args, **kwargs)
 
@@ -752,6 +753,136 @@ class VideoReactionList(APIView):
             return Response({"message": "Multiple objects returned"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"message": f"Error deleting reaction: {e.message}"}, status=status.HTTP_400_BAD_REQUEST)
+        
+class ArticleBookmarkListCreate(generics.ListCreateAPIView):
+    queryset = ArticleBookmark
+    serializer_class = ArticleBookmarkSerializer
+
+    def delete(self, request, *args, **kwargs):
+        ArticleBookmark.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser()]
+
+        return super().get_permissions()
+    
+class ArticleBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ArticleBookmark
+    serializer_class = ArticleBookmarkSerializer
+
+    def get_permissions(self):
+        if self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated()]
+        return super().get_permissions()
+    
+class ArticleBookmarkList(APIView):
+    def get(self, request, *args, **kwargs):
+        user = request.query_params.get("user", None)
+        articleId = request.query_params.get("articleId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user=user)
+        if articleId:
+            filters &= Q(articleId=articleId)
+
+        if any([user, articleId]):
+            articleBookmarks = ArticleBookmark.objects.filter(filters)
+        else:
+            articleBookmarks = ArticleBookmark.objects.all()
+
+        serializer = ArticleBookmarkSerializer(articleBookmarks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, *args, **kwargs):
+        user = request.query_params.get("user", None)
+        articleId = request.query_params.get("articleId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user=user)
+        if articleId:
+            filters &= Q(articleId=articleId)
+
+        try:
+            articleBookmark = ArticleBookmark.objects.get(filters)
+            articleBookmark.delete()
+            return Response({"message": "Article Bookmark Object Successfully Deleted"}, status=status.HTTP_204_NO_CONTENT)
+        except ArticleBookmark.DoesNotExist:
+            return Response({"message": "Article Bookmark Object Not Found"}, status=status.HTTP_404_NOT_FOUND)
+        except ArticleBookmark.MultipleObjectsReturned:
+            return Response({"message": "Too Many Article Bookmark Objects Returned"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"message": f"An Error Deleting Article Bookmark Object: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+
+class VideoBookmarkListCreate(generics.ListCreateAPIView):
+    queryset = VideoBookmark
+    serializer_class = VideoBookmarkSerializer
+
+    def delete(self, request, *args, **kwargs):
+        TemporaryVideoBookmark.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser()]
+
+        return super().get_permissions()
+    
+class VideoBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = VideoBookmark
+    serializer_class = VideoBookmarkSerializer
+
+    def get_permissions(self):
+        if self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated()]
+        return super().get_permissions()
+    
+class VideoBookmarkList(APIView):
+    def get(self, request, *args, **kwargs):
+        user = request.query_params.get("user", None)
+        videoId = request.query_params.get("videoId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user=user)
+        if videoId:
+            filters &= Q(videoId=videoId)
+
+        if any([user, videoId]):
+            videoBookmarks = VideoBookmark.objects.filter(filters)
+        else:
+            videoBookmarks = VideoBookmark.objects.all()
+
+        serializer = TemporaryVideoBookmarkSerializer(videoBookmarks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, *args, **kwargs):
+        user = request.query_params.get("user", None)
+        videoId = request.query_params.get("videoId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user=user)
+        if videoId:
+            filters &= Q(videoId=videoId)
+
+        try:
+            videoBookmark = VideoBookmark.objects.get(filters)
+            videoBookmark.delete()
+            return Response({"message": "Video Bookmark Object Successfully Deleted"}, status=status.HTTP_204_NO_CONTENT)
+        except VideoBookmark.DoesNotExist:
+            return Response({"message": "Video Bookmark Object Not Found"}, status=status.HTTP_404_NOT_FOUND)
+        except VideoBookmark.MultipleObjectsReturned:
+            return Response({"message": "Too Many Video Bookmark Objects Returned"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"message": f"An Error Deleting Video Bookmark Object: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 class SearchHistoryCreate(generics.ListCreateAPIView):
 
@@ -1032,10 +1163,10 @@ class TemporaryVideoCommentListCreate(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        videoId = data.get("videoId")
-        video = Video.objects.get(id=videoId)
-        video.commentNum = video.commentNum + 1 if video.commentNum else 0
-        video.save(update_fields=["commentNum"])
+        # videoId = data.get("videoId")
+        # video = Video.objects.get(id=videoId)
+        # video.commentNum = video.commentNum + 1 if video.commentNum else 0
+        # video.save(update_fields=["commentNum"])
 
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -1061,11 +1192,11 @@ class TemporaryVideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyA
         """
         temporaryVideoComment = self.get_object()
         id = temporaryVideoComment.id
-        videoId = temporaryVideoComment.articleId
+        # videoId = temporaryVideoComment.articleId
 
-        video = Video.objects.get(id=videoId.id)
-        video.commentNum = video.commentNum - 1 if video.commentNum > 0 else 0
-        video.save(update_fields=["commentNum"])
+        # video = Video.objects.get(id=videoId.id)
+        # video.commentNum = video.commentNum - 1 if video.commentNum > 0 else 0
+        # video.save(update_fields=["commentNum"])
 
         response = super().delete(request, *args, **kwargs)
 
@@ -1142,10 +1273,10 @@ class TemporaryArticleCommentListCreate(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        articleId = data.get("articleId")
-        article = Article.objects.get(id=articleId)
-        article.commentNum = article.commentNum + 1 if article.commentNum else 1
-        article.save(update_fields=["commentNum"])
+        # articleId = data.get("articleId")
+        # article = Article.objects.get(id=articleId)
+        # article.commentNum = article.commentNum + 1 if article.commentNum else 1
+        # article.save(update_fields=["commentNum"])
 
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -1173,9 +1304,9 @@ class TemporaryArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestr
         id = temporaryArticleComment.id
         articleId = temporaryArticleComment.articleId
 
-        article = Article.objects.get(id=articleId.id)
-        article.commentNum = article.commentNum - 1 if article.commentNum > 0 else 0
-        article.save(update_fields=["commentNum"])
+        # article = Article.objects.get(id=articleId.id)
+        # article.commentNum = article.commentNum - 1 if article.commentNum > 0 else 0
+        # article.save(update_fields=["commentNum"])
 
         response = super().delete(request, *args, **kwargs)
 
@@ -1252,10 +1383,10 @@ class TemporaryArticleReactionListCreate(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        articleId = data.get("articleId")
-        article = Article.objects.get(id=articleId)
-        article.likeNum = article.likeNum + 1 if article.likeNum else 1
-        article.save(update_fields=["likeNum"])
+        # articleId = data.get("articleId")
+        # article = Article.objects.get(id=articleId)
+        # article.likeNum = article.likeNum + 1 if article.likeNum else 1
+        # article.save(update_fields=["likeNum"])
 
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -1283,9 +1414,9 @@ class TemporaryArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestr
         id = temporaryArticleReaction.id
         articleId = temporaryArticleReaction.videoId
 
-        article = Article.objects.get(id=articleId.id)
-        article.likeNum = article.likeNum - 1 if article.likeNum > 0 else 0
-        article.save(update_fields=["likeNum"])
+        # article = Article.objects.get(id=articleId.id)
+        # article.likeNum = article.likeNum - 1 if article.likeNum > 0 else 0
+        # article.save(update_fields=["likeNum"])
 
         response = super().delete(request, *args, **kwargs)
 
@@ -1347,9 +1478,9 @@ class TemporaryArticleReactionList(APIView):
             temporaryArticleReaction = TemporaryArticleReaction.objects.get(filters)
             temporaryArticleReaction.delete()
 
-            article = Article.objects.get(id=articleId)
-            article.likeNum = article.likeNum - 1
-            article.save(update_fields=["likeNum"])
+            # article = Article.objects.get(id=articleId)
+            # article.likeNum = article.likeNum - 1
+            # article.save(update_fields=["likeNum"])
 
             return Response({"message": "Object successfully deleted"}, status=status.HTTP_204_NO_CONTENT)
         except TemporaryArticleReaction.DoesNotExist:
@@ -1385,10 +1516,10 @@ class TemporaryVideoReactionListCreate(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        videoId = data.get("videoId")
-        video = Video.objects.get(id=videoId)
-        video.likeNum = video.likeNum + 1 if video.likeNum else 1
-        video.save(update_fields=["likeNum"])
+        # videoId = data.get("videoId")
+        # video = Video.objects.get(id=videoId)
+        # video.likeNum = video.likeNum + 1 if video.likeNum else 1
+        # video.save(update_fields=["likeNum"])
 
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -1414,11 +1545,11 @@ class TemporaryVideoReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroy
         """
         temporaryVideoReaction = self.get_object()
         id = temporaryVideoReaction.id
-        videoId = temporaryVideoReaction.videoId
+        # videoId = temporaryVideoReaction.videoId
 
-        video = Video.objects.get(id=videoId.id)
-        video.likeNum = video.likeNum - 1 if video.likeNum > 0 else 0
-        video.save(update_fields=["likeNum"]) 
+        # video = Video.objects.get(id=videoId.id)
+        # video.likeNum = video.likeNum - 1 if video.likeNum > 0 else 0
+        # video.save(update_fields=["likeNum"]) 
 
         response = super().delete(request, *args, **kwargs)
 
@@ -1480,9 +1611,9 @@ class TemporaryVideoReactionList(APIView):
             temporaryVideoReaction = TemporaryVideoReaction.objects.get(filters)
             temporaryVideoReaction.delete()
 
-            video = Video.objects.get(id=videoId)
-            video.likeNum = video.likeNum - 1
-            video.save(update_fields=["likeNum"])
+            # video = Video.objects.get(id=videoId)
+            # video.likeNum = video.likeNum - 1
+            # video.save(update_fields=["likeNum"])
 
             return Response({"message": "Object deleted"}, status=status.HTTP_204_NO_CONTENT)
         except TemporaryVideoReaction.DoesNotExist:
@@ -1491,6 +1622,136 @@ class TemporaryVideoReactionList(APIView):
             return Response({"message": "Multiple objects returned"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"message": f"Error deleting reaction: {e.message}"}, status=status.HTTP_400_BAD_REQUEST)
+
+class TemporaryArticleBookmarkListCreate(generics.ListCreateAPIView):
+    queryset = TemporaryArticleBookmark
+    serializer_class = TemporaryArticleBookmarkSerializer
+
+    def delete(self, request, *args, **kwargs):
+        TemporaryArticleBookmark.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser()]
+
+        return super().get_permissions()
+    
+class TemporaryArticleBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = TemporaryArticleBookmark
+    serializer_class = TemporaryArticleBookmarkSerializer
+
+    def get_permissions(self):
+        if self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated()]
+        return super().get_permissions()
+    
+class TemporaryArticleBookmarkList(APIView):
+    def get(self, request, *args, **kwargs):
+        user = request.query_params.get("user", None)
+        articleId = request.query_params.get("articleId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user=user)
+        if articleId:
+            filters &= Q(articleId=articleId)
+
+        if any([user, articleId]):
+            temporaryArticleBookmarks = TemporaryArticleBookmark.objects.filter(filters)
+        else:
+            temporaryArticleBookmarks = TemporaryArticleBookmark.objects.all()
+
+        serializer = TemporaryArticleBookmarkSerializer(temporaryArticleBookmarks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, *args, **kwargs):
+        user = request.query_params.get("user", None)
+        articleId = request.query_params.get("articleId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user=user)
+        if articleId:
+            filters &= Q(articleId=articleId)
+
+        try:
+            temporaryArticleBookmark = TemporaryArticleBookmark.objects.get(filters)
+            temporaryArticleBookmark.delete()
+            return Response({"message": "Article Bookmark Object Successfully Deleted"}, status=status.HTTP_204_NO_CONTENT)
+        except TemporaryArticleBookmark.DoesNotExist:
+            return Response({"message": "Article Bookmark Object Not Found"}, status=status.HTTP_404_NOT_FOUND)
+        except TemporaryArticleBookmark.MultipleObjectsReturned:
+            return Response({"message": "Too Many Article Bookmark Objects Returned"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"message": f"An Error Deleting Article Bookmark Object: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+        
+class TemporaryVideoBookmarkListCreate(generics.ListCreateAPIView):
+    queryset = TemporaryVideoBookmark
+    serializer_class = TemporaryVideoBookmarkSerializer
+
+    def delete(self, request, *args, **kwargs):
+        TemporaryVideoBookmark.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsAdminUser()]
+
+        return super().get_permissions()
+    
+class TemporaryVideoBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = TemporaryVideoBookmark
+    serializer_class = TemporaryVideoBookmarkSerializer
+
+    def get_permissions(self):
+        if self.request.method in ["PUT", "PATCH"]:
+            return [IsAuthenticated()]
+        return super().get_permissions()
+    
+class TemporaryVideoBookmarkList(APIView):
+    def get(self, request, *args, **kwargs):
+        user = request.query_params.get("user", None)
+        videoId = request.query_params.get("videoId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user=user)
+        if videoId:
+            filters &= Q(videoId=videoId)
+
+        if any([user, videoId]):
+            temporaryVideoBookmarks = TemporaryVideoBookmark.objects.filter(filters)
+        else:
+            temporaryVideoBookmarks = TemporaryVideoBookmark.objects.all()
+
+        serializer = TemporaryVideoBookmarkSerializer(temporaryVideoBookmarks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, *args, **kwargs):
+        user = request.query_params.get("user", None)
+        videoId = request.query_params.get("videoId", None)
+
+        filters = Q()
+
+        if user:
+            filters &= Q(user=user)
+        if videoId:
+            filters &= Q(videoId=videoId)
+
+        try:
+            temporaryVideoBookmark = TemporaryVideoBookmark.objects.get(filters)
+            temporaryVideoBookmark.delete()
+            return Response({"message": "Video Bookmark Object Successfully Deleted"}, status=status.HTTP_204_NO_CONTENT)
+        except TemporaryVideoBookmark.DoesNotExist:
+            return Response({"message": "Video Bookmark Object Not Found"}, status=status.HTTP_404_NOT_FOUND)
+        except TemporaryVideoBookmark.MultipleObjectsReturned:
+            return Response({"message": "Too Many Video Bookmark Objects Returned"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"message": f"An Error Deleting Video Bookmark Object: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 def get_home(request, *args, **kwargs):
     return render(request, 'index.html', {})
@@ -1767,8 +2028,65 @@ def upload_article(request, *args, **kwargs):
     )
 
 def upload_article_with_only_url(request, *args, **kwargs):
+    start = time.time()
     if request.method == 'POST':
         form = ArticleUploadFromWithUrl(request.POST)
+        if form.is_valid():
+            url = form.cleaned_data.get("url")
+            articleContent = None
+
+            if "get_data" in request.POST:
+                try:
+                    articleContent = get_article_content(url)
+
+                    with open("temp2.txt", "w") as f:
+                        json.dump(articleContent, f, indent=4)
+
+                    return render(
+                        request,
+                        "upload_form.html",
+                        {
+                            "form": form,
+                            "form_type": "e",
+                            "data": articleContent
+                        }
+                    )
+                except Exception as e:
+                    end = time.time()
+                    return render(
+                        request,
+                        "upload_result.html",
+                        {
+                            "message": f"Error getting content from url {url}: {e}",
+                            "files": None,
+                            "time_message": f"Totel time: {end - start}s"
+                        }
+                    )
+            elif "upload" in request.POST:
+                with open("temp2.txt", "r") as f:
+                    articleContent = json.load(f)
+                if not articleContent:
+                    end = time.time()
+                    return render(
+                        request,
+                        'upload_result.html',
+                        {
+                            'message': "Data hasn't occured yet.",
+                            'files': None,
+                            'time_message': f"Total time: {end - start}s"
+                        }
+                    )
+                try:
+                    article = Article.objects.create(
+                        title=articleContent["title"],
+                        author=articleContent["author"],
+                        description=articleContent["description"],
+                        articleUniqueId=articleContent["articleUniqueId"],
+                        content=articleContent["content"],
+                        urlToImage=articleContent["urlToImage"]
+                    )
+                except Exception as e:
+                    pass
 
     else:
         form = ArticleUploadFromWithUrl()
@@ -2166,3 +2484,115 @@ def update_profile(request, *args, **kwargs):
 @login_required
 def profile(request, *args, **kwargs):
     user = request.user
+
+def get_article_content(url="ggg"):
+    res = requests.get(url)
+
+    if not res.ok:
+        raise Exception(f"Error getting article: {res.status}")
+    bs = BeautifulSoup(res.content, "html.parser")
+
+    timenow = datetime.now()
+    formatted = timenow.strftime("%Y-%m-%d-%H-%M-%S")
+
+    if url.startswith("https://news.samsung.com"):
+        container = bs.find("div", {"class": "container"})
+        title = container.find("h1", {"class": "title"}).text
+        cont = container.find("div", {"class": "text_cont"})
+        description = cont.find("h3", {"class": "subtitle"}).text
+        content_ps = cont.find_all(lambda tag: tag.name in ["div", "h3"] and not tag.hasAttr("class"))
+
+        for tag in content_ps:
+            if tag.find("img"):
+                urlToImage = tag.find("img").get("src", None)
+
+        content = "\n\n".join(c.text for c in content_ps)
+
+        articleUniqueId = "samsung-" + formatted
+        author = "Samsung"
+
+    elif url.startswith("https://www.apple.com"):
+        article = bs.find("article", {"class": "article"})
+        title = article.find("h1", {"class": "hero-headline"})
+        figure = article.find("figure", {"class": "image"})
+        urlToImage = figure.find("img").get("src", None)
+
+        content_text = ""
+
+        pagebodies = article.find_all("div", {"class": "pagebody"})
+        for pagebody in pagebodies:
+            pagebodyCopies = pagebody.find_all("div", {"class": "pagebody-copy"})
+            for pagebodyCopy in pagebodyCopies:
+                content_text += pagebodyCopy.text + "\n\n"
+
+        articleUniqueId = "apple-" + formatted
+        description = ""
+        author = "Apple"
+
+    elif url.startswith("https://www.mi.com/"):
+        article = bs.find("section", {"class": "new-detail__main"})
+        title = article.find("div", {"class": "new-detail__title"}).text
+        content_ps = article.find("div", {"class": "new-detail__content"}).find_all("p")
+
+        content = "\n\n".join(c.text for c in content_ps)
+
+        articleUniqueId = "xiaomi-" + formatted
+
+        description = ""
+        urlToImage = ""
+        author = "Xiaomi"
+
+    elif url.startswith("https://huawei.com"):
+        article = bs.find("div", {"class": "main"})
+        title = article.find("div", {"class": "container-custom"})
+        content_ps = article.find("div", {"class": "news-detail-content"}).find_all("p")
+
+        content = "\n\n".join(c.text for c in content_ps)
+
+        articleUniqueId = "huawei-" + formatted
+
+        description = ""
+        urlToImage = ""
+        author = "Huawei"
+
+    elif url.startswith("https://www.asus.com"):
+        article = bs.find("div", {"class": "NewsContentPage__newsContent__2nfMh"})
+        title = article.find("h1", {"class": "NewsContentPage__title__1sZvm"})
+        mainArticle = article.find("article")
+        urlToImage = mainArticle.find("img").get("src", None)
+        content_ps = article.find_all("p")
+
+        content = "\n\n".join(c.text for c in content_ps)
+
+        articleUniqueId = "asus-" + formatted
+
+        description = ""
+        author = "Asus"
+
+    elif url.startswith("https://www.dell.com"):
+        article = bs.find("article")
+        header = article.find("header")
+        title = header.find("h1", {"class": "entry-title"}).text
+        description = header.find("div", {"class": "entry-excerpt"}).text
+
+        entryMeta = header.find("div", {"class": "entry-meta"})
+        author = entryMeta.find("a", {"rel": "author"}).text
+        
+        urlToImage = article.find("img", {"class": "signle-featured-image-header-thumbnail-big"}).get("src", None)
+        content_ps = article.find("div", {"class": "entry-content"}).find_all(["p", "h3", "h4"])
+
+        content = "\n\n".join(c.text for c in content_ps)
+
+        articleUniqueId = "dell-" + formatted
+
+    else:
+        raise Exception("The url does not exist or is not supported.")
+    
+    return {
+        "title": title,
+        "description": description,
+        "author": author,
+        "urlToImage": urlToImage,
+        "content": content,
+        "articleUniqueId": articleUniqueId
+    }

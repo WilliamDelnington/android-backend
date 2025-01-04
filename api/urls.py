@@ -93,6 +93,36 @@ urlpatterns = [
         name="list-temporary-article-reactions"
         ),
     path(
+        "articles/bookmarks",
+        views.ArticleBookmarkListCreate.as_view(),
+        name="create-article-bookmarks"
+        ),
+    path(
+        "articles/bookmarks/<int:pk>",
+        views.ArticleBookmarkRetrieveUpdateDestroy.as_view(),
+        name="update-article-bookmarks"
+        ),
+    path(
+        "articles/bookmarks/search",
+        views.ArticleBookmarkList.as_view(),
+        name="list-article-bookmarks"
+        ),
+    path(
+        "articles/bookmarks/temporary",
+        views.TemporaryArticleBookmarkListCreate.as_view(),
+        name="create-temporary-article-bookmarks"
+        ),
+    path(
+        "articles/bookmarks/temporary/<int:pk>",
+        views.TemporaryArticleBookmarkRetrieveUpdateDestroy.as_view(),
+        name="update-temporary-article-bookmarks"
+        ),
+    path(
+        "articles/bookmarks/temporary/search",
+        views.TemporaryArticleBookmarkList.as_view(),
+        name="list-temporary-article-bookmarks"
+        ),
+    path(
         'videos', 
         views.VideoListCreate.as_view(), 
         name='create-video'
@@ -196,6 +226,36 @@ urlpatterns = [
         "videos/reactions/temporary/search",
         views.TemporaryVideoReactionList.as_view(),
         name="list-temporary-video-reactions"
+        ),
+    path(
+        "videos/bookmarks",
+        views.VideoBookmarkListCreate.as_view(),
+        name="create-video-bookmarks"
+        ),
+    path(
+        "videos/bookmarks/<int:pk>",
+        views.VideoBookmarkRetrieveUpdateDestroy.as_view(),
+        name="update-video-bookmarks"
+        ),
+    path(
+        "videos/bookmarks/search",
+        views.VideoBookmarkList.as_view(),
+        name="list-video-bookmarks"
+        ),
+    path(
+        "videos/bookmarks/temporary",
+        views.TemporaryVideoBookmarkListCreate.as_view(),
+        name="create-temporary-video-bookmarks"
+        ),
+    path(
+        "videos/bookmarks/temporary/<int:pk>",
+        views.TemporaryVideoBookmarkRetrieveUpdateDestroy.as_view(),
+        name="update-temporary-video-bookmarks"
+        ),
+    path(
+        "videos/bookmarks/temporary/search",
+        views.TemporaryVideoBookmarkList.as_view(),
+        name="list-temporary-video-bookmarks"
         ),
     path(
         'searchHistory', 

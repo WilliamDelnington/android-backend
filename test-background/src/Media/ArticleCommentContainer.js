@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import VideoComment from './VideoComment'
+import ArticleComment from './ArticleComment'
 
-export default function VideoCommentContainer({ videoId }) {
+export default function ArticleCommentContainer({ articleId }) {
     const [errorMessage, setErrorMessage] = useState("")
     const [loading, setLoading] = useState(true)
     const [commentData, setCommentData] = useState([])
@@ -11,7 +11,7 @@ export default function VideoCommentContainer({ videoId }) {
     useEffect(() => {
         async function fetchData() {
             try {
-                const res = await fetch(privateUrl + `videos/comments/temporary/search?videoId=${videoId}`)
+                const res = await fetch(privateUrl + `articles/comments/temporary/search?articleId=${articleId}`)
                 if (!res.ok) {
                     throw new Error(`${res.status}`)
                 }
@@ -19,7 +19,7 @@ export default function VideoCommentContainer({ videoId }) {
                 const commentdata = await Promise.all(data.map(d => getUsername(d)))
                 setCommentData(commentdata)
             } catch (error) {
-                setErrorMessage(`Error fetching comments in video ${videoId}: ${error.message}`)
+                setErrorMessage(`Error fetching comments in video ${articleId}: ${error.message}`)
             } finally {
                 setLoading(false)
             }
@@ -47,23 +47,24 @@ export default function VideoCommentContainer({ videoId }) {
     }
 
 
+
   return (
-    <div>
-        {loading && <div>Loading comments...</div>}
-        <div className="comment-container">
-            {(!loading && commentData.length > 0) ? commentData.map((comment, key) => (
-                <VideoComment
-                key={key}
-                commentId={comment.id}
-                content={comment.content} 
-                username={comment.username} 
-                createdTime={comment.createdTime}
-                videoId={videoId}/>
-            )) : <div></div>}
-        </div>
-        <div style={{
-            color: "red"
-        }}>{errorMessage}</div>
-    </div>
-  )
+      <div>
+          {loading && <div>Loading comments...</div>}
+          <div className="comment-container">
+              {(!loading && commentData.length > 0) ? commentData.map((comment, key) => (
+                  <ArticleComment
+                  key={key}
+                  commentId={comment.id}
+                  content={comment.content} 
+                  username={comment.username} 
+                  createdTime={comment.createdTime}
+                  articleId={articleId}/>
+              )) : <div></div>}
+          </div>
+          <div style={{
+              color: "red"
+          }}>{errorMessage}</div>
+      </div>
+    )
 }

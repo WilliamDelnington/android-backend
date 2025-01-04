@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
 
-export default function VideoComment({content, username, createdTime, videoId, commentId}) {
+export default function ArticleComment({content, username, createdTime, articleId, commentId}) {
     const [message, setMessage] = useState("")
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
@@ -11,33 +11,33 @@ export default function VideoComment({content, username, createdTime, videoId, c
     const isAuthenticated = localStorage.getItem("is_authenticated") === "true"
 
     async function handleSubmit(e) {
-      setError("")
-      setLoading(true)
-      e.preventDefault()
-      
-      try {
-        const response = await fetch(privateUrl + "videos/comments/temporary", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            content: `@${username} ` + message,
-            videoId: videoId,
-            user: parseInt(localStorage.getItem("userId")),
-            parentId: commentId
+        setError("")
+        setLoading(true)
+        e.preventDefault()
+        
+        try {
+          const response = await fetch(privateUrl + "articles/comments/temporary", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              content: `@${username} ` + message,
+              articleId: articleId,
+              user: parseInt(localStorage.getItem("userId")),
+              parentId: commentId
+            })
           })
-        })
-        if (response.status < 200 || response.status >= 300) {
-          throw new Error("response returning the status " + response.status)
+          if (response.status < 200 || response.status >= 300) {
+            throw new Error("response returning the status " + response.status)
+          }
+        } catch (err) {
+          setError("Error creating comment: " + err.message)
+        } finally {
+          setLoading(false)
         }
-      } catch (err) {
-        setError("Error creating comment: " + err.message)
-      } finally {
-        setLoading(false)
+        
       }
-      
-    }
 
   return (
     <div className="video-comment">

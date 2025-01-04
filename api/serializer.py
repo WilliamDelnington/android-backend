@@ -31,6 +31,16 @@ class VideoReactionSerializer(serializers.ModelSerializer):
         model = VideoReaction
         fields = '__all__'
 
+class ArticleBookmarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArticleBookmark
+        fields = '__all__'
+
+class VideoBookmarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VideoBookmark
+        fields = '__all__'
+
 class SearchHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchHistory
@@ -92,4 +102,14 @@ class TemporaryArticleReactionSerializer(serializers.ModelSerializer):
 class TemporaryVideoReactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TemporaryVideoReaction
+        fields = '__all__'
+
+class TemporaryArticleBookmarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemporaryArticleBookmark
+        fields = '__all__'
+
+class TemporaryVideoBookmarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemporaryVideoBookmark
         fields = '__all__'
