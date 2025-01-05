@@ -1910,7 +1910,7 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
                 videoBrandType = form.cleaned_data.get("videoBrandType", None)
                 try:
                     video_file_id = upload_file(video_file_path, "tempvideo.mp4")
-                    image_file_id = upload_file(image_file_path, "thumbnail.jpg") if os.path.exists(image_file_path) else None
+                    image_file_id = upload_file(image_file_path, "thumbnail.jpg", "image/jpeg") if os.path.exists(image_file_path) else None
                 except Exception as e:
                     message = f"An error occured while uploading file: {e}"
                 finally:
@@ -2033,11 +2033,13 @@ def upload_article_with_only_url(request, *args, **kwargs):
         form = ArticleUploadFromWithUrl(request.POST)
         if form.is_valid():
             url = form.cleaned_data.get("url")
+            articleBrandType = form.cleaned_data.get("articleBrandType")
             articleContent = None
 
             if "get_data" in request.POST:
                 try:
                     articleContent = get_article_content(url)
+                    articleContent["articleBrandType"] = articleBrandType
 
                     with open("temp2.txt", "w") as f:
                         json.dump(articleContent, f, indent=4)
@@ -2047,7 +2049,7 @@ def upload_article_with_only_url(request, *args, **kwargs):
                         "upload_form.html",
                         {
                             "form": form,
-                            "form_type": "e",
+                            "form_type": "d",
                             "data": articleContent
                         }
                     )
@@ -2083,10 +2085,38 @@ def upload_article_with_only_url(request, *args, **kwargs):
                         description=articleContent["description"],
                         articleUniqueId=articleContent["articleUniqueId"],
                         content=articleContent["content"],
-                        urlToImage=articleContent["urlToImage"]
+                        urlToImage=articleContent["urlToImage"],
+                        articleBrandType=articleBrandType
+                    )
+                    end = time.time()
+                    return render(
+                        request,
+                        'upload_result.html',
+                        {
+                            "message": f"Successfully create article object: {article.articleUniqueId}",
+                            "time_message": f"Total time: {end - start}s"
+                        }
                     )
                 except Exception as e:
-                    pass
+                    end = time.time()
+                    return render(
+                        request,
+                        "upload_result.html",
+                        {
+                            "message": f"Error creating article object: {e}",
+                            "time_message": f"Total time: {end - start}s"
+                        }
+                    )
+            elif "reset" in request.POST:
+                articleContent = None
+                return render(
+                    request,
+                    "upload_form.html",
+                    {
+                        "form_type": "d",
+                        "form": form
+                    }
+                )
 
     else:
         form = ArticleUploadFromWithUrl()
@@ -2509,6 +2539,7 @@ def get_article_content(url="ggg"):
         content = "\n\n".join(c.text for c in content_ps)
 
         articleUniqueId = "samsung-" + formatted
+
         author = "Samsung"
 
     elif url.startswith("https://www.apple.com"):

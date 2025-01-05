@@ -246,6 +246,23 @@ class ArticleUploadForm(forms.Form):
         return publishedAt
     
 class ArticleUploadFromWithUrl(forms.Form):
+    CHOICES = [
+        ("Samsung", "Samsung"),
+        ("Apple", "Apple"),
+        ("Nokia", "Nokia"),
+        ("Microsoft", "Microsoft"),
+        ("Google", "Google"),
+        ("Dell", "Dell"),
+        ("Asus", "Asus"),
+        ("Huawei", "Huawei"),
+        ("Xiaomi", "Xiaomi")
+    ]
+    articleBrandType = forms.ChoiceField(
+        choices=CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        }))
+
     url = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )

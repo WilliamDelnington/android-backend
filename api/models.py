@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from django.utils import timezone
-
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -44,19 +43,25 @@ class SearchHistory(models.Model):
     searchDate = models.DateTimeField(auto_now_add=True)
   
 class Article(models.Model):
-  articleUniqueId = models.CharField(max_length=100, unique=True, serialize=False)
-  articleBrandType = models.CharField(default=None, max_length=30, unique=True)
-  sourceName = models.CharField(max_length=100, null=True)
-  author = models.CharField(max_length=200, null=True)
-  title = models.TextField(null=True)
-  description = models.TextField(null=True)
-  url = models.TextField(null=True)
-  urlToImage = models.TextField(null=True)
-  publishedAt = models.DateTimeField(null=False, default=timezone.now)
-  content = models.TextField(null=True)
-  commentNum = models.IntegerField(null=False, default=0)
-  likeNum = models.IntegerField(null=False, default=0)
-  bookmarkNum = models.IntegerField(null=False, default=0)
+   articleUniqueId = models.CharField(max_length=100, unique=True, serialize=False)
+   articleBrandType = models.CharField(default=None, max_length=30, unique=True)
+   sourceName = models.CharField(max_length=100, null=True)
+   author = models.CharField(max_length=200, null=True)
+   title = models.TextField(null=True)
+   description = models.TextField(null=True)
+   url = models.TextField(null=True)
+   urlToImage = models.TextField(null=True)
+   publishedAt = models.DateTimeField(null=False, default=timezone.now)
+   content = models.TextField(null=True)
+   commentNum = models.IntegerField(null=False, default=0)
+   likeNum = models.IntegerField(null=False, default=0)
+   bookmarkNum = models.IntegerField(null=False, default=0)
+
+   def save(self, *args, **kwargs):
+      if not self.author:
+         self.author = self.sourceName
+      
+      super().save(*args, **kwargs)
 
 class Video(models.Model):
   id = models.BigAutoField(primary_key=True)
@@ -205,6 +210,7 @@ class VideoBookmark(models.Model):
 
 class TemporaryUser(models.Model):
    username = models.CharField(max_length=100, unique=True)
+   # profileImage = models.FileField(storage=storage.S3MediaStorage(), upload_to="/Uploads")
 
 class TemporarySearchHistory(models.Model):
    user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, related_name='search_histories')

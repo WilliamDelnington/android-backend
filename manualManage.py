@@ -2,9 +2,10 @@ import os
 import django
 from yt_dlp import YoutubeDL
 from django.conf import settings
-from api.utils import upload_file
+from api.utils import upload_file, delete_specific_file
 import traceback
 from PIL import Image
+import threading
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AndroidAPI.settings')
 django.setup()
@@ -91,5 +92,31 @@ def setup_fetchable_urls():
     except Exception as e:
         print(e)
 
+def fixup_damaging_files(i):
+    def fixing_object(id):
+        try:
+            video = Video.objects.get(id=id)
+            thumbnailImageId = video.thumbnailImageId
+
+            file_path = os.path.join(settings.BASE_DIR, 'Images')
+            file_name = f"thumbnail_image_{id}.png"
+            if not os.path.exists(os.path.join(file_path, file_name)):
+                file_name = f"thumbnail_image_{id}.jpg"
+            if not os.path.exists(os.path.join(file_path, file_name)):
+                print(f"Path does not exist: {file_name}")
+            
+            delete_specific_file(thumbnailImageId)
+            imageId = upload_file(os.path.join(file_path, file_name), f"thumbnail_image_{id}.jpg", "image/jpeg")
+            video.thumbnailImageUrl = f"https://drive.google.com/file/d/{imageId}/view"
+            video.thumbnailImageFetchableUrl = f"fetch/{imageId}"
+            video.thumbnailImageId = imageId
+            video.save(update_fields=["thumbnailImageId", "thumbnailImageUrl", "thumbnailImageFetchableUrl"])
+
+            print(f"Successfully update object {id}, visit the site https://android-backend-tech-c52e01da23ae.herokuapp.com/videos/{id} to see the changes")
+        except Exception as e:
+            print(f"Error in id {id}: {traceback.print_exc()}")
+
+    fixing_object(i)
+
 if __name__ == "__main__":
-    setup_fetchable_urls()
+    fixup_damaging_files(36)
