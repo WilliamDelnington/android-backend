@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser
-from .forms import CustomUserChangeForm, CustomUserCreationsForm
+from .models import CustomUser, TemporaryUser
+from .forms import CustomUserChangeForm, CustomUserCreationsForm, TemporaryUserCreationForm
 
 # Register your models here.
 class CustomUserAdmin(UserAdmin):
@@ -35,5 +35,26 @@ class CustomUserAdmin(UserAdmin):
 
     add_form = CustomUserCreationsForm
     form = CustomUserChangeForm
+
+class TemporaryUserAdmin(admin.ModelAdmin):
+    form = TemporaryUserCreationForm
+    list_display = ("username", "profileImage")
+    search_fields = ("username",)
+
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = (
+        "articleUniqueId",
+        "articleBrandType",
+        "sourceName",
+        "author",
+        "title",
+        "description",
+        "url",
+        "urlToImage",
+        "publishedAt",
+        "content"
+    )
+
+admin.site.register(TemporaryUser, TemporaryUserAdmin)
 
 admin.site.register(CustomUser, CustomUserAdmin)

@@ -118,5 +118,22 @@ def fixup_damaging_files(i):
 
     fixing_object(i)
 
+def fixing_object(i, alter_file):
+    try:
+        video = Video.objects.get(thumbnailImageId=i)
+        file_folder = os.path.join(settings.BASE_DIR, 'Images')
+        
+        delete_specific_file(i)
+        imageId = upload_file(os.path.join(file_folder, alter_file), f"thumbnail_image.jpg", "image/jpeg")
+        video.thumbnailImageUrl = f"https://drive.google.com/file/d/{imageId}/view"
+        video.thumbnailImageFetchableUrl = f"fetch/{imageId}"
+        video.thumbnailImageId = imageId
+        video.save(update_fields=["thumbnailImageId", "thumbnailImageUrl", "thumbnailImageFetchableUrl"])
+
+        print(f"Successfully update object, visit the site to see the changes")
+    except:
+        print(f"Error: {traceback.print_exc()}")
+        
+
 if __name__ == "__main__":
-    fixup_damaging_files(36)
+    fixing_object("1Qq7GzJp7cNcyxqOYCwBP2H-xPaMWi0PA", "hqdefault.jpg")

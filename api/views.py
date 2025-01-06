@@ -755,7 +755,7 @@ class VideoReactionList(APIView):
             return Response({"message": f"Error deleting reaction: {e.message}"}, status=status.HTTP_400_BAD_REQUEST)
         
 class ArticleBookmarkListCreate(generics.ListCreateAPIView):
-    queryset = ArticleBookmark
+    queryset = ArticleBookmark.objects.all()
     serializer_class = ArticleBookmarkSerializer
 
     def delete(self, request, *args, **kwargs):
@@ -769,7 +769,7 @@ class ArticleBookmarkListCreate(generics.ListCreateAPIView):
         return super().get_permissions()
     
 class ArticleBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ArticleBookmark
+    queryset = ArticleBookmark.objects.all()
     serializer_class = ArticleBookmarkSerializer
 
     def get_permissions(self):
@@ -819,8 +819,27 @@ class ArticleBookmarkList(APIView):
         except Exception as e:
             return Response({"message": f"An Error Deleting Article Bookmark Object: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
+class GetArticlesFromBookmark(APIView):
+    def get(self, request, *args, **kwargs):
+        user = request.query_params.get("user")
+
+        returned_articles = []
+
+        if not user:
+            return Response({"message": "user id does not specified"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            articleBookmarks = ArticleBookmark.objects.filter(user=user)
+            for articleBookmark in articleBookmarks:
+                article = Article.objects.get(id=articleBookmark.articleId.id)
+                article_serializer = ArticleSerializer(article)
+                returned_articles.append(article_serializer.data)
+            return Response(returned_articles, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"message": f"An error getting article: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+
 class VideoBookmarkListCreate(generics.ListCreateAPIView):
-    queryset = VideoBookmark
+    queryset = VideoBookmark.objects.all()
     serializer_class = VideoBookmarkSerializer
 
     def delete(self, request, *args, **kwargs):
@@ -834,7 +853,7 @@ class VideoBookmarkListCreate(generics.ListCreateAPIView):
         return super().get_permissions()
     
 class VideoBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    queryset = VideoBookmark
+    queryset = VideoBookmark.objects.all()
     serializer_class = VideoBookmarkSerializer
 
     def get_permissions(self):
@@ -883,6 +902,25 @@ class VideoBookmarkList(APIView):
             return Response({"message": "Too Many Video Bookmark Objects Returned"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"message": f"An Error Deleting Video Bookmark Object: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+
+class GetVideosFromBookmark(APIView):
+    def get(self, request, *args, **kwargs):
+        user = request.query_params.get('user')
+
+        returned_videos = []
+
+        if not user:
+            return Response({"message": "user id does not specified"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            videoBookmarks = VideoBookmark.objects.filter(user=user)
+            for videoBookmark in videoBookmarks:
+                video = Video.objects.get(id=videoBookmark.videoId.id)
+                video_serializer = VideoSerializer(video)
+                returned_videos.append(video_serializer.data)
+            return Response(returned_videos, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"message": f"An error getting video: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 class SearchHistoryCreate(generics.ListCreateAPIView):
 
@@ -1624,7 +1662,7 @@ class TemporaryVideoReactionList(APIView):
             return Response({"message": f"Error deleting reaction: {e.message}"}, status=status.HTTP_400_BAD_REQUEST)
 
 class TemporaryArticleBookmarkListCreate(generics.ListCreateAPIView):
-    queryset = TemporaryArticleBookmark
+    queryset = TemporaryArticleBookmark.objects.all()
     serializer_class = TemporaryArticleBookmarkSerializer
 
     def delete(self, request, *args, **kwargs):
@@ -1638,7 +1676,7 @@ class TemporaryArticleBookmarkListCreate(generics.ListCreateAPIView):
         return super().get_permissions()
     
 class TemporaryArticleBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    queryset = TemporaryArticleBookmark
+    queryset = TemporaryArticleBookmark.objects.all()
     serializer_class = TemporaryArticleBookmarkSerializer
 
     def get_permissions(self):
@@ -1688,8 +1726,27 @@ class TemporaryArticleBookmarkList(APIView):
         except Exception as e:
             return Response({"message": f"An Error Deleting Article Bookmark Object: {e}"}, status=status.HTTP_400_BAD_REQUEST)
         
+class GetArticlesFromTemporaryBookmark(APIView):
+    def get(self, request, *args, **kwargs):
+        user = request.query_params.get("user")
+
+        returned_articles = []
+
+        if not user:
+            return Response({"message": "user id does not specified"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            temporaryArticleBookmarks = TemporaryArticleBookmark.objects.filter(user=user)
+            for articleBookmark in temporaryArticleBookmarks:
+                article = Article.objects.get(id=articleBookmark.articleId.id)
+                article_serializer = ArticleSerializer(article)
+                returned_articles.append(article_serializer.data)
+            return Response(returned_articles, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"message": f"An error getting article: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+
 class TemporaryVideoBookmarkListCreate(generics.ListCreateAPIView):
-    queryset = TemporaryVideoBookmark
+    queryset = TemporaryVideoBookmark.objects.all()
     serializer_class = TemporaryVideoBookmarkSerializer
 
     def delete(self, request, *args, **kwargs):
@@ -1703,7 +1760,7 @@ class TemporaryVideoBookmarkListCreate(generics.ListCreateAPIView):
         return super().get_permissions()
     
 class TemporaryVideoBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    queryset = TemporaryVideoBookmark
+    queryset = TemporaryVideoBookmark.objects.all()
     serializer_class = TemporaryVideoBookmarkSerializer
 
     def get_permissions(self):
@@ -1753,6 +1810,25 @@ class TemporaryVideoBookmarkList(APIView):
         except Exception as e:
             return Response({"message": f"An Error Deleting Video Bookmark Object: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
+class GetVideosFromTemporaryBookmark(APIView):
+    def get(self, request, *args, **kwargs):
+        user = request.query_params.get('user')
+
+        returned_videos = []
+
+        if not user:
+            return Response({"message": "user id does not specified"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            temporaryVideoBookmarks = TemporaryVideoBookmark.objects.filter(user=user)
+            for videoBookmark in temporaryVideoBookmarks:
+                video = Video.objects.get(id=videoBookmark.videoId.id)
+                video_serializer = VideoSerializer(video)
+                returned_videos.append(video_serializer.data)
+            return Response(returned_videos, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"message": f"An error getting video: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+
 def get_home(request, *args, **kwargs):
     return render(request, 'index.html', {})
 
@@ -1773,6 +1849,7 @@ def upload_to_google_drive(request, *args, **kwargs):
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
             video_uploaded_file = request.FILES['videoFiles']
+            print(video_uploaded_file)
             thumbnail_image_file = request.FILES['thumbnailImageFiles']
             videoBrandType = form.cleaned_data.get("videoBrandType", None)
             author = form.cleaned_data.get('author', None)
@@ -1792,7 +1869,7 @@ def upload_to_google_drive(request, *args, **kwargs):
             # Upload to Google Drive
             try:
                 video_file_id = upload_file(video_file_path, video_uploaded_file.name)
-                image_file_id = upload_file(thumbnail_image_path, thumbnail_image_file.name)
+                image_file_id = upload_file(thumbnail_image_path, thumbnail_image_file.name, "image/jpeg")
             except Exception as e:
                 message = f"An error occured: {e}"
             finally:

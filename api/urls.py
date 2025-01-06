@@ -258,6 +258,11 @@ urlpatterns = [
         name="list-temporary-video-bookmarks"
         ),
     path(
+        "videos/bookmarks/temporary/getVideos",
+        views.GetVideosFromTemporaryBookmark.as_view(),
+        name="get-videos-from-temporary-bookmarks"
+        ),
+    path(
         'searchHistory', 
         views.SearchHistoryCreate.as_view(),
         name='create-search-history'

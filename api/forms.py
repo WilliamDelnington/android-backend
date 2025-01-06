@@ -2,7 +2,7 @@ from django import forms
 from django.utils import timezone
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.core.exceptions import ValidationError
-from .models import CustomUser
+from .models import *
 import re
 
 def validate_password(value):
@@ -80,7 +80,7 @@ class FileUploadForm(forms.Form):
             'class': 'form-control',
             'accept': 'image/jpeg, image/png, image/webp',
         }),
-        label="Thumbnail Image File:"
+        label="Thumbnail Image File: "
         )
 
     def __init__(self, *args, **kwargs):
@@ -421,3 +421,8 @@ class CustomUserChangeForm(UserChangeForm):
         username = self.cleaned_data.get("username")
         if CustomUser.objects.filter(username=username).exclude(id=self.instance.id).exists():
             raise ValidationError("Username already taken.")
+        
+class TemporaryUserCreationForm(forms.ModelForm):
+    class Meta:
+        model = TemporaryUser
+        fields = "__all__"

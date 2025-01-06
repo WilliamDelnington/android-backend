@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from django.utils import timezone
+from .storage import S3MediaStorage
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -60,6 +61,8 @@ class Article(models.Model):
    def save(self, *args, **kwargs):
       if not self.author:
          self.author = self.sourceName
+      if not self.articleUniqueId:
+         self.articleUniqueId = self.sourceName + "-" + str(self.publishedAt)
       
       super().save(*args, **kwargs)
 
@@ -139,6 +142,11 @@ class ArticleReaction(models.Model):
    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False)
    articleId = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
 
+   class Meta:
+      constraints = [
+         models.UniqueConstraint(fields=["user", "articleId"], name="unique_article_reaction")
+      ]
+
    def save(self, *args, **kwargs):
       if self.articleId:
          self.articleId.likeNum = self.articleId.likeNum + 1 if self.articleId.likeNum else 1
@@ -157,6 +165,11 @@ class VideoReaction(models.Model):
    id = models.BigAutoField(primary_key=True, null=False)
    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False)
    videoId = models.ForeignKey(Video, on_delete=models.CASCADE, null=False)
+
+   class Meta:
+      constraints = [
+         models.UniqueConstraint(fields=["user", "videoId"], name="unique_video_reaction")
+      ]
 
    def save(self, *args, **kwargs):
       if self.videoId:
@@ -178,6 +191,11 @@ class ArticleBookmark(models.Model):
    articleId = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
    savedTime = models.DateTimeField(auto_now_add=True, null=False)
 
+   class Meta:
+      constraints = [
+         models.UniqueConstraint(fields=["user", "articleId"], name="unique_article_bookmark")
+      ]
+
    def save(self, *args, **kwargs):
       if self.articleId:
          self.articleId.bookmarkNum = self.articleId.bookmarkNum + 1 if self.articleId.bookmarkNum else 1
@@ -196,6 +214,11 @@ class VideoBookmark(models.Model):
    videoId = models.ForeignKey(Video, on_delete=models.CASCADE, null=False)
    savedTime = models.DateTimeField(auto_now_add=True, null=False)
 
+   class Meta:
+      constraints = [
+         models.UniqueConstraint(fields=["user", "videoId"], name="unique_video_bookmark")
+      ]
+
    def save(self, *args, **kwargs):
       if self.videoId:
          self.videoId.bookmarkNum = self.videoId.bookmarkNum + 1 if self.videoId.bookmarkNum else 1
@@ -210,7 +233,7 @@ class VideoBookmark(models.Model):
 
 class TemporaryUser(models.Model):
    username = models.CharField(max_length=100, unique=True)
-   # profileImage = models.FileField(storage=storage.S3MediaStorage(), upload_to="/Uploads")
+   profileImage = models.FileField(storage=S3MediaStorage(), upload_to="Uploads/", blank=True)
 
 class TemporarySearchHistory(models.Model):
    user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, related_name='search_histories')
@@ -266,6 +289,11 @@ class TemporaryArticleReaction(models.Model):
    user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False)
    articleId = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
 
+   class Meta:
+      constraints = [
+         models.UniqueConstraint(fields=["user", "articleId"], name="unique_temporary_article_reaction")
+      ]
+
    def save(self, *args, **kwargs):
       if self.articleId:
          self.articleId.likeNum = self.articleId.likeNum + 1 if self.articleId.likeNum else 1
@@ -284,6 +312,11 @@ class TemporaryVideoReaction(models.Model):
    id = models.BigAutoField(primary_key=True, null=False)
    user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False)
    videoId = models.ForeignKey(Video, on_delete=models.CASCADE, null=False)
+
+   class Meta:
+      constraints = [
+         models.UniqueConstraint(fields=["user", "videoId"], name="unique_temporary_video_reaction")
+      ]
 
    def save(self, *args, **kwargs):
       if self.videoId:
@@ -305,6 +338,11 @@ class TemporaryArticleBookmark(models.Model):
    articleId = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
    savedTime = models.DateTimeField(auto_now_add=True, null=False)
 
+   class Meta:
+      constraints = [
+         models.UniqueConstraint(fields=["user", "articleId"], name="unique_temporary_article_bookmark")
+      ]
+
    def save(self, *args, **kwargs):
       if self.articleId:
          self.articleId.bookmarkNum = self.articleId.bookmarkNum + 1 if self.articleId.bookmarkNum else 1
@@ -322,6 +360,11 @@ class TemporaryVideoBookmark(models.Model):
    user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, null=False)
    videoId = models.ForeignKey(Video, on_delete=models.CASCADE, null=False)
    savedTime = models.DateTimeField(auto_now_add=True, null=False)
+
+   class Meta:
+      constraints = [
+         models.UniqueConstraint(fields=["user", "videoId"], name="unique_temporary_video_bookmark")
+      ]
 
    def save(self, *args, **kwargs):
       if self.videoId:
