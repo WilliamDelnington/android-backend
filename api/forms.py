@@ -17,7 +17,7 @@ def validate_username(value):
     if not re.search(r'^[a-zA-Z][a-zA-Z0-9_]*$', value):
         raise ValidationError("Username should never contain the symbols except underscores.")
 
-class FileUploadForm(forms.ModelForm):
+class FileUploadForm(forms.Form):
     CHOICES = [
         ("Samsung", "Samsung"),
         ("Apple", "Apple"),

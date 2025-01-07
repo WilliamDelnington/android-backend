@@ -75,20 +75,20 @@ class ArticleAdmin(admin.ModelAdmin):
     form = ArticleUploadForm
 
 class VideoAdmin(admin.ModelAdmin):
-    list_display = (
-        "videoUniqueId",
-        "thumbnailImageId",
-        "videoBrandType",
-        "author",
-        "title",
-        "url",
-        "fetchable_url",
-        "thumbnailImageUrl",
-        "thumbnailImageFetchableUrl",
-        "createdTime"
-    )
+    # list_display = (
+    #     "videoUniqueId",
+    #     "thumbnailImageId",
+    #     "videoBrandType",
+    #     "author",
+    #     "title",
+    #     "url",
+    #     "fetchable_url",
+    #     "thumbnailImageUrl",
+    #     "thumbnailImageFetchableUrl",
+    #     "createdTime"
+    # )
 
-    add_form = FileUploadForm
+    form = FileUploadForm
 
 class ArticleCommentAdmin(admin.ModelAdmin):
     form = ArticleCommentForm
