@@ -17,7 +17,7 @@ def validate_username(value):
     if not re.search(r'^[a-zA-Z][a-zA-Z0-9_]*$', value):
         raise ValidationError("Username should never contain the symbols except underscores.")
 
-class FileUploadForm(forms.Form):
+class FileUploadForm(forms.ModelForm):
     CHOICES = [
         ("Samsung", "Samsung"),
         ("Apple", "Apple"),
@@ -141,7 +141,7 @@ class CustomUserChangeForm(UserChangeForm):
         model = CustomUser
         fields = ('email', 'username', 'is_active', 'is_staff', 'is_superuser')
 
-class ArticleUploadForm(forms.Form):
+class ArticleUploadForm(forms.ModelForm):
     articleId = forms.CharField(
         required=True,
         max_length=150,
@@ -422,7 +422,68 @@ class CustomUserChangeForm(UserChangeForm):
         if CustomUser.objects.filter(username=username).exclude(id=self.instance.id).exists():
             raise ValidationError("Username already taken.")
         
+class ArticleCommentForm(forms.ModelForm):
+    class Meta:
+        model = ArticleComment
+        fields = "__all__"
+
+class VideoCommentForm(forms.ModelForm):
+    class Meta:
+        model = VideoComment
+        fields = "__all__"
+
+class ArticleReactionForm(forms.ModelForm):
+    class Meta:
+        model = ArticleReaction
+        fields = "__all__"
+
+class VideoReactionForm(forms.ModelForm):
+    class Meta:
+        model = VideoReaction
+        fields = "__all__"
+
+class ArticleBookmarkForm(forms.ModelForm):
+    class Meta:
+        model = ArticleBookmark
+        fields = "__all__"
+
+class VideoBookmarkForm(forms.ModelForm):
+    class Meta:
+        model = VideoBookmark
+        fields = "__all__"
+
 class TemporaryUserCreationForm(forms.ModelForm):
     class Meta:
         model = TemporaryUser
         fields = "__all__"
+
+class TemporaryArticleCommentForm(forms.ModelForm):
+    class Meta:
+        model = TemporaryArticleComment
+        fields = "__all__"
+
+class TemporaryVideoCommentForm(forms.ModelForm):
+    class Meta:
+        model = TemporaryVideoComment
+        fields = "__all__"
+
+class TemporaryArticleReactionForm(forms.ModelForm):
+    class Meta:
+        model = TemporaryArticleReaction
+        fields = "__all__"
+
+class TemporaryVideoReactionForm(forms.ModelForm):
+    class Meta:
+        model = TemporaryVideoReaction
+        fields = "__all__"
+
+class TemporaryArticleBookmarkForm(forms.ModelForm):
+    class Meta:
+        model = TemporaryArticleBookmark
+        fields = "__all__"
+
+class TemporaryVideoBookmarkForm(forms.ModelForm):
+    class Meta:
+        model = TemporaryVideoBookmark
+        fields = "__all__"
+

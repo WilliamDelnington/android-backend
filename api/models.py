@@ -233,6 +233,7 @@ class VideoBookmark(models.Model):
 
 class TemporaryUser(models.Model):
    username = models.CharField(max_length=100, unique=True)
+   displayname = models.CharField(max_length=100, null=True)
    profileImage = models.FileField(storage=S3MediaStorage(), upload_to="Uploads/", blank=True)
 
 class TemporarySearchHistory(models.Model):

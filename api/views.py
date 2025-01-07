@@ -48,7 +48,7 @@ class ArticleListCreate(generics.ListCreateAPIView):
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all article objects at once.
+        Delete all article objects at once. Only admin users can perform this action.
         """
 
         Article.objects.all().delete()
@@ -89,7 +89,7 @@ class ArticleList(APIView):
         """
         A get request that get all specific articles using keywords.
 
-        For example, when you set the view path as "/ArticleList", to get all the articles
+        For example, if you set the view path as "/ArticleList", to get all the articles
         that has keyword "max" in article's source name or brand type, type "/ArticleList?originKey=max",
         or to get all the articles that has keyword "dashing" in article's content, type 
         "/ArticleList?contentKey=dashing". You can also filter using both keywords like this: 
@@ -160,7 +160,7 @@ class VideoListCreate(generics.ListCreateAPIView):
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all video objects at once.
+        Delete all video objects at once. Only admin users can perform this action.
         """
 
         Video.objects.all().delete()
@@ -200,7 +200,7 @@ class VideoList(APIView):
         """
         A get request that get all specific article comments using keywords.
 
-        For example, when you set the view path as "/VideoList", to get all the articles
+        For example, if you set the view path as "/VideoList", to get all the articles
         that has keyword "max" in video's brand type or author, use "/VideoList?keyword=max",
         or to get all the articles that has keyword "inside" in video's title, use "/VideoList?key=inside".
         You can use both keyword filtering like this: "/VideoList?keyword=max?key=inside"
@@ -262,10 +262,30 @@ class ArticleCommentListCreate(generics.ListCreateAPIView):
     queryset = ArticleComment.objects.all()
     serializer_class = ArticleCommentSerializer
 
+    def get(self, request, *args, **kwargs):
+        """
+        Get all article comment data.
+        """
+        response = super().get(request, args, kwargs)
+
+        data = response.data
+
+        returned_data = []
+
+        for small_data in data:
+            user = small_data["user"]
+            userObject = CustomUser.objects.get(id=user)
+            username = userObject.username
+            small_data["username"] = username
+
+            returned_data.append(small_data)
+
+        return Response(returned_data, status=status.HTTP_200_OK)
+
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all article comment objects at once.
+        Delete all article comment objects at once. Only admin users can perform this action.
         """
 
         ArticleComment.objects.all().delete()
@@ -273,7 +293,7 @@ class ArticleCommentListCreate(generics.ListCreateAPIView):
     
     def post(self, request, *args, **kwargs):
         """
-        A post request that both create article comment and update the article's comment number.
+        Create article comment and update the article's comment number.
         """
 
         data = request.data
@@ -306,7 +326,7 @@ class ArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
 
     def delete(self, request, *args, **kwargs):
         """
-        A delete request that both delete the article comment and update the article's comments number.
+        Delete the article comment and update the number of comments associated to the article.
         """
 
         articleComment = self.get_object()
@@ -339,7 +359,7 @@ class ArticleCommentList(APIView):
     def get(self, request, format=None):
 
         """
-        A get request that get all specific article comments using keywords.
+        Get all specific article comments using keywords/queries.
 
         For example, when you set the view path as "/ArticleCommentList", to get all the article comments
         that has keyword "max" in content, use "/ArticleCommentList?keyword=max".
@@ -360,13 +380,23 @@ class ArticleCommentList(APIView):
 
         if any([key, user, articleId]):
             # Return all objects which content contains the keyword.
-            articleComments = VideoComment.objects.filter(filters)
+            articleComments = ArticleComment.objects.filter(filters)
         else:
             # If no filters are used, return all objects.
-            articleComments = VideoComment.objects.all()
+            articleComments = ArticleComment.objects.all()
 
-        serializer = ArticleCommentSerializer(articleComments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        returned_data = []
+
+        for comment in articleComments:
+            user = comment.user
+            username = user.username
+            serializer = ArticleCommentSerializer(comment)
+            data = serializer.data
+            data["username"] = username
+
+            returned_data.append(data)
+
+        return Response(returned_data, status=status.HTTP_200_OK)
     
 
 class VideoCommentListCreate(generics.ListCreateAPIView):
@@ -378,10 +408,30 @@ class VideoCommentListCreate(generics.ListCreateAPIView):
     queryset = VideoComment.objects.all()
     serializer_class = VideoCommentSerializer
 
+    def get(self, request, *args, **kwargs):
+        """
+        Get all video comment objects.
+        """
+        response = super().get(request, args, kwargs)
+
+        data = response.data
+
+        returned_data = []
+
+        for small_data in data:
+            user = small_data["user"]
+            userObject = CustomUser.objects.get(id=user)
+            username = userObject.username
+            small_data["username"] = username
+
+            returned_data.append(returned_data)
+
+        return Response(returned_data, status=status.HTTP_200_OK)
+
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all video comment objects at once.
+        Delete all video comment objects at once. Only admin users can perform this action.
         """
 
         VideoComment.objects.all().delete()
@@ -423,7 +473,7 @@ class VideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         """
-        A delete request that both deletes the video comment and update the video's comments number.
+        Deletes the video comment and update the number of comments associated with the video.
         """
         videoComment = self.get_object()
         id = videoComment.id
@@ -455,7 +505,7 @@ class VideoCommentList(APIView):
     def get(self, request, format=None):
 
         """
-        A get request that get all specific article comments using keywords.
+        A get request that get all specific video comments using keywords.
 
         For example, when you set the view path as "/VideoCommentList", to get all the video comments
         that has keyword "max" in content, use "/VideoCommentList?keyword=max".
@@ -496,7 +546,7 @@ class ArticleReactionListCreate(generics.ListCreateAPIView):
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all article comment objects at once.
+        Delete all article comment objects at once. Only admin users can perform this action.
         """
 
         ArticleReaction.objects.all().delete()
@@ -504,7 +554,7 @@ class ArticleReactionListCreate(generics.ListCreateAPIView):
     
     def post(self, request, *args, **kwargs):
         """
-        A post request that create a new article reaction and update the article's reactions number.
+        Create a new article reaction and update the number of reactions the article receives.
         """
         data = request.data
         serializer = self.get_serializer(data=data)
@@ -535,7 +585,7 @@ class ArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
 
     def delete(self, request, *args, **kwargs):
         """
-        A delete request that deletes the article reaction and update the article's reactions number.
+        Deletes a specific article reaction using its id and update the number of reactions the article receives.
         """
         articleReaction = self.get_object()
         # id = articleReaction.id
@@ -560,16 +610,19 @@ class ArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
 class ArticleReactionList(APIView):
 
     """
-    A view that get all specific article comments using keyword.
+    A view that get all specific article reactions using keyword/queries.
     """
 
     def get(self, request, format=None):
 
         """
-        A get request that get all specific article comments using keywords.
+        Get all specific article reactions using keywords/queries.
 
-        For example, when you set the view path as "/ArticleCommentList", to get all the article comments
-        that has keyword "max" in content, use "/ArticleCommentList?keyword=max".
+        For example, if you set the view path as "/ArticleReactionList", to get all the article reactions
+        from a specific user, use the user's id, for example "/ArticleReationList?user=6". You can also get
+        the reactions from a specific article, like "/ArticleReactionList?articleId=5"
+
+        To use both queries, use the format like "articleId=<articleId>&user=<userId>"
         """
 
         user = request.query_params.get("user", None)
@@ -593,6 +646,12 @@ class ArticleReactionList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, format=None):
+        """
+        Delete specific article's reaction using queries and update the number of reactions the article gets.
+
+        Note that this only delete only one reaction objects. If there are multiple objects for deleting, it
+        will return an error. Please use both queries like this: articleId=<articleId>&user=<userId>
+        """
         user = request.query_params.get("user", None)
         articleId = request.query_params.get("articleId", None)
 
@@ -631,7 +690,7 @@ class VideoReactionListCreate(generics.ListCreateAPIView):
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all video comment objects at once.
+        Delete all video comment objects at once. Only admin users can perform this action.
         """
 
         VideoReaction.objects.all().delete()
@@ -639,7 +698,7 @@ class VideoReactionListCreate(generics.ListCreateAPIView):
     
     def post(self, request, *args, **kwargs):
         """
-        A post request that create a video reaction and update the video's reaction number.
+        Create a video reaction and update the number of reactions the video receives.
         """
         data = request.data
         serializer = self.get_serializer(data=data)
@@ -670,7 +729,7 @@ class VideoReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         """
-        A delete request that both deletes video reactions and updates the video's reaction number.
+        Deletes a specific video reaction using its id and updates the number of video reactions.
         """
         videoReaction = self.get_object()
         id = videoReaction.id
@@ -701,10 +760,13 @@ class VideoReactionList(APIView):
     def get(self, request, format=None):
 
         """
-        A get request that get all specific article comments using keywords.
+        A get request that get all specific video reactions using keywords/queries.
 
-        For example, when you set the view path as "/VideoCommentList", to get all the video comments
-        that has keyword "max" in content, use "/VideoCommentList?keyword=max".
+        For example, if you set the view path as "/VideoReactionList", to get all the video reactions
+        from a specific user, use the user's id, for example "/VideoReationList?user=6". You can also get
+        the reactions from a specific video, like "/VideoReactionList?videoId=5"
+
+        To use both queries, use the format like "videoId=<videoId>&user=<userId>"
         """
 
         user = request.query_params.get("user", None)
@@ -728,6 +790,12 @@ class VideoReactionList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, format=None):
+        """
+        Delete specific video's reaction using queries and update the number of reactions the article gets.
+
+        Note that this only delete only one reaction objects. If there are multiple objects for deleting, it
+        will return an error. Please use both queries like this: videoId=<videoId>&user=<userId>
+        """
         user = request.query_params.get("user", None)
         videoId = request.query_params.get("videoId", None)
 
@@ -755,10 +823,16 @@ class VideoReactionList(APIView):
             return Response({"message": f"Error deleting reaction: {e.message}"}, status=status.HTTP_400_BAD_REQUEST)
         
 class ArticleBookmarkListCreate(generics.ListCreateAPIView):
+    """
+    A view that creates article bookmark object or deletes all the objects at once.
+    """
     queryset = ArticleBookmark.objects.all()
     serializer_class = ArticleBookmarkSerializer
 
     def delete(self, request, *args, **kwargs):
+        """
+        Delete all article bookmark objects at once. Only admin users can perform this action.
+        """
         ArticleBookmark.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -769,8 +843,12 @@ class ArticleBookmarkListCreate(generics.ListCreateAPIView):
         return super().get_permissions()
     
 class ArticleBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    """
+    A view that get, update, or delete the article bookmark object using its id.
+    """
     queryset = ArticleBookmark.objects.all()
     serializer_class = ArticleBookmarkSerializer
+    lookup_field = "pk"
 
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -778,7 +856,19 @@ class ArticleBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
         return super().get_permissions()
     
 class ArticleBookmarkList(APIView):
+    """
+    A view that get or delete article bookmark objects using keywords/queries.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Get all specific article bookmarks using queries.
+
+        For example, when you set the view path as "/ArticleBookmarkList", to get all the article bookmarks
+        from a specific user, use the user's id, for example "/ArticleBookmarkList?user=6". You can also get
+        the bookmarks from a specific article, like "/ArticleBookmarkList?articleId=5"
+
+        To use both queries, use the format like "articleId=<articleId>&user=<userId>"
+        """
         user = request.query_params.get("user", None)
         articleId = request.query_params.get("articleId", None)
 
@@ -798,6 +888,14 @@ class ArticleBookmarkList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, *args, **kwargs):
+
+        """
+        Delete a specific article bookmark using queries and update the number of bookmarks of the article.
+
+        Note that this only delete only one bookmark. If there are multiple objects for deleting, it will
+        return an error. Please use both queries like this: articleId=<articleId>&user=<userId>
+        """
+
         user = request.query_params.get("user", None)
         articleId = request.query_params.get("articleId", None)
 
@@ -820,6 +918,9 @@ class ArticleBookmarkList(APIView):
             return Response({"message": f"An Error Deleting Article Bookmark Object: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetArticlesFromBookmark(APIView):
+    """
+    A view to get every article from bookmark.
+    """
     def get(self, request, *args, **kwargs):
         user = request.query_params.get("user")
 
@@ -839,10 +940,16 @@ class GetArticlesFromBookmark(APIView):
             return Response({"message": f"An error getting article: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 class VideoBookmarkListCreate(generics.ListCreateAPIView):
+    """
+    A view that creates video bookmark object or deletes all the objects at once.
+    """
     queryset = VideoBookmark.objects.all()
     serializer_class = VideoBookmarkSerializer
 
     def delete(self, request, *args, **kwargs):
+        """
+        Delete all video bookmark objects at once. Only admin users can perform this action.
+        """
         TemporaryVideoBookmark.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -853,8 +960,12 @@ class VideoBookmarkListCreate(generics.ListCreateAPIView):
         return super().get_permissions()
     
 class VideoBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    """
+    A view that get, update, or delete the video bookmark object using its id.
+    """
     queryset = VideoBookmark.objects.all()
     serializer_class = VideoBookmarkSerializer
+    lookup_field = "pk"
 
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -863,6 +974,17 @@ class VideoBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     
 class VideoBookmarkList(APIView):
     def get(self, request, *args, **kwargs):
+
+        """
+        Get all specific video bookmarks using queries.
+
+        For example, when you set the view path as "/VideoBookmarkList", to get all the video bookmarks
+        from a specific user, use the user's id, for example "/VideoBookmarkList?user=6". You can also get
+        the bookmarks from a specific video, like "/VideoBookmarkList?articleId=5"
+
+        To use both queries, use the format like "videoId=<videoId>&user=<userId>"
+        """
+
         user = request.query_params.get("user", None)
         videoId = request.query_params.get("videoId", None)
 
@@ -882,6 +1004,12 @@ class VideoBookmarkList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, *args, **kwargs):
+        """
+        Delete specific video's bookmark using queries and update the number of bookmarks of the video.
+
+        Note that this only delete only one bookmark objects. If there are multiple objects for deleting, it
+        will return an error. Please use both queries like this: videoId=<videoId>&user=<userId>
+        """
         user = request.query_params.get("user", None)
         videoId = request.query_params.get("videoId", None)
 
@@ -904,6 +1032,9 @@ class VideoBookmarkList(APIView):
             return Response({"message": f"An Error Deleting Video Bookmark Object: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetVideosFromBookmark(APIView):
+    """
+    A view to get every video from bookmarks.
+    """
     def get(self, request, *args, **kwargs):
         user = request.query_params.get('user')
 
@@ -934,7 +1065,7 @@ class SearchHistoryCreate(generics.ListCreateAPIView):
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all search history objects at once.
+        Delete all search history objects at once. Only admin users can perform this action.
         """
 
         SearchHistory.objects.all().delete()
@@ -999,7 +1130,7 @@ class UserListCreate(generics.ListCreateAPIView):
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all user objects at once.
+        Delete all user objects at once. Only admin users can perform this action.
         """
 
         CustomUser.objects.all().delete()
@@ -1103,15 +1234,24 @@ class RegisterView(generics.CreateAPIView):
         )
     
 class TemporaryUserListCreate(generics.ListCreateAPIView):
+    """
+    A view to create a temporary user.
+    """
     queryset = TemporaryUser.objects.all()
     serializer_class = TemporaryUserSerializer
 
 class TemporaryUserRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    """
+    A view to update, get, or delete user using its id.
+    """
     queryset = TemporaryUser.objects.all()
     serializer_class = TemporaryUserSerializer
     lookup_field = "pk"
 
 class TemporaryUserGet(APIView):
+    """
+    Get the temporary user using username.
+    """
     def get(self, request, *args, **kwargs):
         username = request.query_params.get("username")
 
@@ -1128,7 +1268,7 @@ class TemporaryUserGet(APIView):
 class TemporarySearchHistoryCreate(generics.ListCreateAPIView):
 
     """
-    A view that get all users search histories or delete all search histories at once.
+    A view that get all temporary users' search histories or delete all search histories at once.
     """
 
     queryset = TemporarySearchHistory.objects.all()
@@ -1137,7 +1277,7 @@ class TemporarySearchHistoryCreate(generics.ListCreateAPIView):
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all search history objects at once.
+        Delete all search history objects at once. Only admin users can perform this action.
         """
 
         TemporarySearchHistory.objects.all().delete()
@@ -1178,16 +1318,36 @@ class TemporarySearchHistoryList(APIView):
 class TemporaryVideoCommentListCreate(generics.ListCreateAPIView):
 
     """
-    A view that get all video comments or delete all video comments at once.
+    Get all temporary video comments or delete all of them at once.
     """
 
     queryset = TemporaryVideoComment.objects.all()
     serializer_class = TemporaryVideoCommentSerializer
 
+    def get(self, request, *args, **kwargs):
+        """
+        Get all temporary video comments.
+        """
+        response = super().get(request, args, kwargs)
+
+        data = response.data
+
+        returned_data = []
+
+        for small_data in data:
+            user = small_data["user"]
+            userObject = TemporaryUser.objects.get(id=user)
+            username = userObject.username
+            small_data["username"] = username
+
+            returned_data.append(small_data)
+
+        return Response(returned_data, status=status.HTTP_200_OK)
+
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all video comment objects at once.
+        Delete all temporary video comment objects at once. Only admin user can do this.
         """
 
         TemporaryVideoComment.objects.all().delete()
@@ -1195,7 +1355,7 @@ class TemporaryVideoCommentListCreate(generics.ListCreateAPIView):
     
     def post(self, request, *args, **kwargs):
         """
-        A post request that create a temporary video comment and update the video's comments number
+        Create a temporary video comment and update the number of comments associated with the video.
         """
         data = request.data
         serializer = self.get_serializer(data=data)
@@ -1217,7 +1377,7 @@ class TemporaryVideoCommentListCreate(generics.ListCreateAPIView):
 class TemporaryVideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     """
-    A view for modifying (updating, deleting) video comments data and get the data using id.
+    A view for modifying (updating, deleting) temporary video comments data and get the data using id.
     """
 
     queryset = TemporaryVideoComment.objects.all()
@@ -1226,7 +1386,7 @@ class TemporaryVideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyA
     
     def delete(self, request, *args, **kwargs):
         """
-        A delete request that deletes the temporary video comment and updates the video's comments number.
+        Deletes the temporary video comment using its id and updates number of comments associated with the video.
         """
         temporaryVideoComment = self.get_object()
         id = temporaryVideoComment.id
@@ -1249,16 +1409,22 @@ class TemporaryVideoCommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyA
 class TemporaryVideoCommentList(APIView):
 
     """
-    A view that get all specific video comments using keyword.
+    A view that get all specific temporary video comments using keywords/queries
     """
 
     def get(self, request, format=None):
 
         """
-        A get request that get all specific article comments using keywords.
+        Get all specific temporary video comments using keywords/queries.
 
-        For example, when you set the view path as "/VideoCommentList", to get all the video comments
-        that has keyword "max" in content, use "/VideoCommentList?keyword=max".
+        For example, when you set the view path as "/TemporaryVideoCommentList", to get all the video comments
+        that has keyword "max" in content, use "/TemporaryVideoCommentList?keyword=max".
+
+        To get the comments in specific video, use /TemporaryVideoCommentList?videoId=<videoId>
+
+        To get the comments from specific user, use /TemporaryVideoCommentList?user=<userId>
+
+        To use multiple queries, use &, for example, videoId=<videoId>&user=<userId>
         """
 
         key = request.query_params.get("key", None)
@@ -1281,8 +1447,20 @@ class TemporaryVideoCommentList(APIView):
             # If no filters are used, return all objects.
             temporaryVideoComments = TemporaryVideoComment.objects.all()
 
-        serializer = TemporaryVideoCommentSerializer(temporaryVideoComments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        response_data = []
+
+        for comment in temporaryVideoComments:
+            user = comment.user
+            username = user.username
+            serializer = TemporaryVideoCommentSerializer(comment)
+            data = serializer.data
+            data["username"] = username
+
+            response_data.append(data)
+
+        # serializer = TemporaryVideoCommentSerializer(temporaryVideoComments, many=True)
+
+        return Response(response_data, status=status.HTTP_200_OK)
     
 
 class TemporaryArticleCommentListCreate(generics.ListCreateAPIView):
@@ -1294,10 +1472,30 @@ class TemporaryArticleCommentListCreate(generics.ListCreateAPIView):
     queryset = TemporaryArticleComment.objects.all()
     serializer_class = TemporaryArticleCommentSerializer
 
+    def get(self, request, *args, **kwargs):
+        """
+        Get all article comments.
+        """
+        response = super().get(request, args, kwargs)
+
+        data = response.data
+
+        returned_data = []
+
+        for small_data in data:
+            user = small_data["user"]
+            userObject = TemporaryUser.objects.get(id=user)
+            username = userObject.username
+            small_data["username"] = username
+
+            returned_data.append(small_data)
+
+        return Response(returned_data, status=status.HTTP_200_OK)
+
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all article comment objects at once.
+        Delete all article comment objects at once. Only admin users can perform this action.
         """
 
         TemporaryArticleComment.objects.all().delete()
@@ -1327,7 +1525,7 @@ class TemporaryArticleCommentListCreate(generics.ListCreateAPIView):
 class TemporaryArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     """
-    A view for modifying (updating, deleting) article comments data and get the data using id.
+    A view for modifying (updating, deleting) temporary article comments data and get the data using id.
     """
 
     queryset = TemporaryArticleComment.objects.all()
@@ -1336,7 +1534,7 @@ class TemporaryArticleCommnentRetrieveUpdateDestroy(generics.RetrieveUpdateDestr
 
     def delete(self, request, *args, **kwargs):
         """
-        A delete request that deletes the temporary article comment and update the number of article's comments number.
+        Deletes the temporary article comment and update the number of comments associated with the article.
         """
         temporaryArticleComment = self.get_object()
         id = temporaryArticleComment.id
@@ -1367,8 +1565,14 @@ class TemporaryArticleCommentList(APIView):
         """
         A get request that get all specific article comments using keywords.
 
-        For example, when you set the view path as "/ArticleCommentList", to get all the article comments
-        that has keyword "max" in content, use "/ArticleCommentList?keyword=max".
+        For example, when you set the view path as "/TemporaryArticleCommentList", to get all the article comments
+        that has keyword "max" in content, use "/TemporaryArticleCommentList?keyword=max".
+
+        To get the comments in specific article, use /TemporaryArticleCommentList?articleId=<articleId>
+
+        To get the comments from specific user, use /TemporaryArticleCommentList?user=<userId>
+
+        To use multiple queries, use &, for example, articleId=<articleId>&user=<userId>
         """
 
         key = request.query_params.get("key", None)
@@ -1398,7 +1602,7 @@ class TemporaryArticleCommentList(APIView):
 class TemporaryArticleReactionListCreate(generics.ListCreateAPIView):
 
     """
-    A view that get all article comments or delete all article comments data.
+    A view that get all temporary article reactions or delete all their data.
     """
 
     queryset = TemporaryArticleReaction.objects.all()
@@ -1407,7 +1611,7 @@ class TemporaryArticleReactionListCreate(generics.ListCreateAPIView):
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all article comment objects at once.
+        Delete all article reactions objects at once. Only admin users can perform this action.
         """
 
         TemporaryArticleReaction.objects.all().delete()
@@ -1415,7 +1619,7 @@ class TemporaryArticleReactionListCreate(generics.ListCreateAPIView):
     
     def post(self, request, *args, **kwargs):
         """
-        A post request that create a new temporary reaction and update article's reaction number.
+        Create a new temporary reaction and update the number of reactions the article receives.
         """
         data = request.data
         serializer = self.get_serializer(data=data)
@@ -1437,7 +1641,7 @@ class TemporaryArticleReactionListCreate(generics.ListCreateAPIView):
 class TemporaryArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     """
-    A view for modifying (updating, deleting) article comments data and get the data using id.
+    A view for modifying (updating, deleting) temporary article reaction data and get the data using its id.
     """
 
     queryset = TemporaryArticleReaction.objects.all()
@@ -1446,7 +1650,7 @@ class TemporaryArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestr
 
     def delete(self, request, *args, **kwargs):
         """
-        A delete request that deletes the temporary article reaction and update the article's reaction number.
+        Deletes the temporary article reaction and update the article's reaction number.
         """
         temporaryArticleReaction = self.get_object()
         id = temporaryArticleReaction.id
@@ -1469,16 +1673,21 @@ class TemporaryArticleReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestr
 class TemporaryArticleReactionList(APIView):
 
     """
-    A view that get all specific article comments using keyword.
+    A view that get all specific temporary article reactions using queries.
     """
 
     def get(self, request, format=None):
 
         """
-        A get request that get all specific article reactions using keywords.
+        A get request that get all specific temporary article reactions using queries
 
-        For example, when you set the view path as "/", to get all the article comments
-        that has keyword "max" in content, use "/ArticleCommentList?keyword=max".
+        Assuming you set the path like "/TemporaryArticleReactionlist".
+
+        To get the reactions in specific article, use "/TemporaryArticleReactionList?articleId=<articleId>"
+
+        To get the reactions from specific user, use "/TemporaryArticleReactionList?user=<userId>"
+
+        To use multiple queries, use &, for example, "articleId=<articleId>&user=<userId>"
         """
 
         user = request.query_params.get("user", None)
@@ -1502,6 +1711,12 @@ class TemporaryArticleReactionList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, format=None):
+        """
+        Delete a specific temporary article reaction using queries.
+
+        Note that this only delete only one reaction. If there are multiple objects for deleting, it will
+        return an error. Please use both queries like this: articleId=<articleId>&user=<userId>
+        """
         user = request.query_params.get('user', None)
         articleId = request.query_params.get('articleId', None)
 
@@ -1531,7 +1746,7 @@ class TemporaryArticleReactionList(APIView):
 class TemporaryVideoReactionListCreate(generics.ListCreateAPIView):
 
     """
-    A view that get all video comments or delete all video comments at once.
+    A view that get all temporary video reactions or delete all of them at once.
     """
 
     queryset = TemporaryVideoReaction.objects.all()
@@ -1540,7 +1755,7 @@ class TemporaryVideoReactionListCreate(generics.ListCreateAPIView):
     def delete(self, request, *args, **kwargs):
 
         """
-        A delete request that delete all video comment objects at once.
+        Delete all temporary video comment objects at once. Only admin users can perform this action.
         """
 
         TemporaryVideoReaction.objects.all().delete()
@@ -1548,7 +1763,7 @@ class TemporaryVideoReactionListCreate(generics.ListCreateAPIView):
     
     def post(self, request, *args, **kwargs):
         """
-        A post request that creates a new video reaction and updates video's reaction number.
+        Creates a new video reaction and updates the number of reactions the video receives.
         """
         data = request.data
         serializer = self.get_serializer(data=data)
@@ -1570,7 +1785,7 @@ class TemporaryVideoReactionListCreate(generics.ListCreateAPIView):
 class TemporaryVideoReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     """
-    A view for modifying (updating, deleting) video comments data and get the data using id.
+    A view for modifying (updating, deleting) temporary video reaction data and get the data using its id.
     """
 
     queryset = TemporaryVideoReaction.objects.all()
@@ -1579,7 +1794,7 @@ class TemporaryVideoReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroy
 
     def delete(self, request, *args, **kwargs):
         """
-        A delete request that deletes the temporary video reaction and update the video's reaction number.
+        Deletes the temporary video reaction and update the number of reactions the video receives.
         """
         temporaryVideoReaction = self.get_object()
         id = temporaryVideoReaction.id
@@ -1602,16 +1817,21 @@ class TemporaryVideoReactionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroy
 class TemporaryVideoReactionList(APIView):
 
     """
-    A view that get all specific video comments using keyword.
+    A view that get all specific temporary video reaction using queries.
     """
 
     def get(self, request, format=None):
 
         """
-        A get request that get all specific article comments using keywords.
+        A get request that get all specific temporary video reaction using queries.
 
-        For example, when you set the view path as "/VideoCommentList", to get all the video comments
-        that has keyword "max" in content, use "/VideoCommentList?keyword=max".
+        Assuming you set the view path as "/TemporaryVideoReactionList".
+
+        To get the reactions in specific video, use "/TemporaryVideoReactionList?videoId=<videoId>"
+
+        To get the reactions from specific user, use "/TemporaryVideoReactionList?user=<userId>"
+
+        To use multiple queries, use &, for example, "videoId=<videoId>&user=<userId>"
         """
 
         user = request.query_params.get("user", None)
@@ -1635,6 +1855,12 @@ class TemporaryVideoReactionList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, format=None):
+        """
+        Delete a specific video reaction using queries.
+
+        Note that this only delete only one reaction. If there are multiple objects for deleting, it will
+        return an error. Please use both queries like this: videoId=<videoId>&user=<userId>
+        """
         user = request.query_params.get('user', None)
         videoId = request.query_params.get('videoId', None)
 
@@ -1662,10 +1888,16 @@ class TemporaryVideoReactionList(APIView):
             return Response({"message": f"Error deleting reaction: {e.message}"}, status=status.HTTP_400_BAD_REQUEST)
 
 class TemporaryArticleBookmarkListCreate(generics.ListCreateAPIView):
+    """
+    A view that get all temporary article bookmarks or delete all of them at once.
+    """
     queryset = TemporaryArticleBookmark.objects.all()
     serializer_class = TemporaryArticleBookmarkSerializer
 
     def delete(self, request, *args, **kwargs):
+        """
+        Delete all tempoarary article bookmarks. Only admin user can perform this action.
+        """
         TemporaryArticleBookmark.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -1676,8 +1908,12 @@ class TemporaryArticleBookmarkListCreate(generics.ListCreateAPIView):
         return super().get_permissions()
     
 class TemporaryArticleBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    """
+    A view to get, update, or delete a temporary article bookmark using its id.
+    """
     queryset = TemporaryArticleBookmark.objects.all()
     serializer_class = TemporaryArticleBookmarkSerializer
+    lookup_field = "pk"
 
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -1685,7 +1921,21 @@ class TemporaryArticleBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestr
         return super().get_permissions()
     
 class TemporaryArticleBookmarkList(APIView):
+    """
+    A view that get or delete temporary article bookmark using queries.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Get all specific temporary article bookmarks using queries
+
+        Assuming you set the path like "/TemporaryArticleBookmarklist".
+
+        To get the bookmarks for specific article, use "/TemporaryArticleBookmarkList?articleId=<articleId>"
+
+        To get the bookmarks from specific user, use "/TemporaryArticleBookmarkList?user=<userId>"
+
+        To use multiple queries, use &, for example, "articleId=<articleId>&user=<userId>"
+        """
         user = request.query_params.get("user", None)
         articleId = request.query_params.get("articleId", None)
 
@@ -1705,6 +1955,12 @@ class TemporaryArticleBookmarkList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, *args, **kwargs):
+        """
+        Delete a specific temporary article bookmark using queries.
+
+        Note that this only delete only one bookmark. If there are multiple objects for deleting, it will
+        return an error. Please use both queries like this: articleId=<articleId>&user=<userId>
+        """
         user = request.query_params.get("user", None)
         articleId = request.query_params.get("articleId", None)
 
@@ -1727,6 +1983,9 @@ class TemporaryArticleBookmarkList(APIView):
             return Response({"message": f"An Error Deleting Article Bookmark Object: {e}"}, status=status.HTTP_400_BAD_REQUEST)
         
 class GetArticlesFromTemporaryBookmark(APIView):
+    """
+    A view to get all articles from a specific user.
+    """
     def get(self, request, *args, **kwargs):
         user = request.query_params.get("user")
 
@@ -1746,10 +2005,16 @@ class GetArticlesFromTemporaryBookmark(APIView):
             return Response({"message": f"An error getting article: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 class TemporaryVideoBookmarkListCreate(generics.ListCreateAPIView):
+    """
+    A view that get all temporary video bookmarks or delete all of them at once.
+    """
     queryset = TemporaryVideoBookmark.objects.all()
     serializer_class = TemporaryVideoBookmarkSerializer
 
     def delete(self, request, *args, **kwargs):
+        """
+        Delete all tempoarary video bookmarks. Only admin user can perform this action.
+        """
         TemporaryVideoBookmark.objects.all().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -1762,6 +2027,7 @@ class TemporaryVideoBookmarkListCreate(generics.ListCreateAPIView):
 class TemporaryVideoBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = TemporaryVideoBookmark.objects.all()
     serializer_class = TemporaryVideoBookmarkSerializer
+    lookup_field = "pk"
 
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -1769,7 +2035,21 @@ class TemporaryVideoBookmarkRetrieveUpdateDestroy(generics.RetrieveUpdateDestroy
         return super().get_permissions()
     
 class TemporaryVideoBookmarkList(APIView):
+    """
+    A view that get or delete temporary video bookmark using queries.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Get all specific temporary video bookmarks using queries
+
+        Assuming you set the path like "/TemporaryVideoBookmarklist".
+
+        To get the bookmarks for specific video, use "/TemporaryVideoBookmarkList?videoId=<videoId>"
+
+        To get the bookmarks from specific user, use "/TemporaryVideoBookmarkList?user=<userId>"
+
+        To use multiple queries, use &, for example, "videoId=<videoId>&user=<userId>"
+        """
         user = request.query_params.get("user", None)
         videoId = request.query_params.get("videoId", None)
 
@@ -1789,6 +2069,12 @@ class TemporaryVideoBookmarkList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, *args, **kwargs):
+        """
+        Delete a specific temporary video bookmark using queries.
+
+        Note that this only delete only one bookmark. If there are multiple objects for deleting, it will
+        return an error. Please use both queries like this: videoId=<videoId>&user=<userId>
+        """
         user = request.query_params.get("user", None)
         videoId = request.query_params.get("videoId", None)
 
@@ -1811,6 +2097,9 @@ class TemporaryVideoBookmarkList(APIView):
             return Response({"message": f"An Error Deleting Video Bookmark Object: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetVideosFromTemporaryBookmark(APIView):
+    """
+    A view to get all videos from a specific user.
+    """
     def get(self, request, *args, **kwargs):
         user = request.query_params.get('user')
 

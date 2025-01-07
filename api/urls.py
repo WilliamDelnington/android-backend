@@ -108,6 +108,11 @@ urlpatterns = [
         name="list-article-bookmarks"
         ),
     path(
+        "articles/bookmarks/getArticles",
+        views.GetArticlesFromBookmark.as_view(),
+        name="get-articles-from-bookmarks"
+        ),
+    path(
         "articles/bookmarks/temporary",
         views.TemporaryArticleBookmarkListCreate.as_view(),
         name="create-temporary-article-bookmarks"
@@ -122,6 +127,10 @@ urlpatterns = [
         views.TemporaryArticleBookmarkList.as_view(),
         name="list-temporary-article-bookmarks"
         ),
+    path(
+        "articles/bookmarks/temporary/getArticles",
+        views.GetArticlesFromTemporaryBookmark.as_view(),
+        name="get-articles-from-temporary-bookmarks"),
     path(
         'videos', 
         views.VideoListCreate.as_view(), 
@@ -241,6 +250,11 @@ urlpatterns = [
         "videos/bookmarks/search",
         views.VideoBookmarkList.as_view(),
         name="list-video-bookmarks"
+        ),
+    path(
+        "videos/bookmarks/getVideos",
+        views.GetVideosFromBookmark.as_view(),
+        name="get-videos-from-bookmarks"
         ),
     path(
         "videos/bookmarks/temporary",

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, TemporaryUser
-from .forms import CustomUserChangeForm, CustomUserCreationsForm, TemporaryUserCreationForm
+from .models import *
+from .forms import *
 
 # Register your models here.
 class CustomUserAdmin(UserAdmin):
@@ -55,6 +55,105 @@ class ArticleAdmin(admin.ModelAdmin):
         "content"
     )
 
+    fields = (
+        "articleUniqueId",
+        "articleBrandType",
+        "sourceName",
+        "author",
+        "title",
+        "description",
+        "url",
+        "urlToImage",
+        "publishedAt",
+        "content"
+    )
+
+    search_fields = (
+        "articleUniqueId",
+    )
+
+    form = ArticleUploadForm
+
+class VideoAdmin(admin.ModelAdmin):
+    list_display = (
+        "videoUniqueId",
+        "thumbnailImageId",
+        "videoBrandType",
+        "author",
+        "title",
+        "url",
+        "fetchable_url",
+        "thumbnailImageUrl",
+        "thumbnailImageFetchableUrl",
+        "createdTime"
+    )
+
+    add_form = FileUploadForm
+
+class ArticleCommentAdmin(admin.ModelAdmin):
+    form = ArticleCommentForm
+
+class VideoCommentAdmin(admin.ModelAdmin):
+    form = VideoCommentForm
+
+class ArticleReactionAdmin(admin.ModelAdmin):
+    form = ArticleReactionForm
+
+class VideoReactionAdmin(admin.ModelAdmin):
+    form = VideoReactionForm
+
+class ArticleBookmarkAdmin(admin.ModelAdmin):
+    form = ArticleBookmarkForm
+
+class VideoBookmarkAdmin(admin.ModelAdmin):
+    form = VideoBookmarkForm
+
+class TemporaryArticleCommentAdmin(admin.ModelAdmin):
+    form = TemporaryArticleCommentForm
+
+class TemporaryVideoCommentAdmin(admin.ModelAdmin):
+    form = TemporaryVideoCommentForm
+
+class TemporaryArticleReactionAdmin(admin.ModelAdmin):
+    form = TemporaryArticleReactionForm
+
+class TemporaryVideoReactionAdmin(admin.ModelAdmin):
+    form = TemporaryVideoReactionForm
+
+class TemporaryArticleBookmarkAdmin(admin.ModelAdmin):
+    form = TemporaryArticleBookmarkForm
+
+class TemporaryVideoBookmarkAdmin(admin.ModelAdmin):
+    form = TemporaryVideoBookmarkForm
+
 admin.site.register(TemporaryUser, TemporaryUserAdmin)
 
 admin.site.register(CustomUser, CustomUserAdmin)
+
+admin.site.register(Article, ArticleAdmin)
+
+admin.site.register(Video, VideoAdmin)
+
+admin.site.register(ArticleComment, ArticleCommentAdmin)
+
+admin.site.register(VideoComment, VideoCommentAdmin)
+
+admin.site.register(ArticleReaction, ArticleReactionAdmin)
+
+admin.site.register(VideoReaction, VideoReactionAdmin)
+
+admin.site.register(ArticleBookmark, ArticleBookmarkAdmin)
+
+admin.site.register(VideoBookmark, VideoBookmarkAdmin)
+
+admin.site.register(TemporaryArticleComment, TemporaryArticleCommentAdmin)
+
+admin.site.register(TemporaryVideoComment, TemporaryVideoReactionAdmin)
+
+admin.site.register(TemporaryArticleReaction, TemporaryArticleReactionAdmin)
+
+admin.site.register(TemporaryVideoReaction, TemporaryVideoReactionAdmin)
+
+admin.site.register(TemporaryArticleBookmark, TemporaryArticleBookmarkAdmin)
+
+admin.site.register(TemporaryVideoBookmark, TemporaryVideoBookmarkAdmin)
