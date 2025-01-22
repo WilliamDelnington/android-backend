@@ -16,7 +16,7 @@ export default function Login() {
 
         e.preventDefault()
 
-        fetch(privateUrl, {
+        fetch(publicUrl, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({

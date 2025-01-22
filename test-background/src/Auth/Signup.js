@@ -23,7 +23,7 @@ export default function Signup() {
             return
         }
 
-        fetch(privateUrl, {
+        fetch(publicUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

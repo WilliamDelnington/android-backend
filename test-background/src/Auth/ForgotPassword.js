@@ -6,7 +6,7 @@ export default function ForgotPassword() {
     const [errorMessage, setErrorMessage] = useState("")
     const [completeMessage, setCompleteMessage] = useState("")
 
-    const publicUrl = "https://android-backend-tech-c52e01da23ae.herokuapp.com/users"
+    const publicUrl = "https://android-backend-tech-c52e01da23ae.herokuapp.com/password-reset"
     const privateUrl = "http://192.168.56.1:8000/password-reset"
 
     function handleSubmit(e) {
@@ -14,7 +14,7 @@ export default function ForgotPassword() {
 
         // const query = `/search?email=${email}`
 
-        fetch(privateUrl, {
+        fetch(publicUrl, {
             method: 'POST',
             headers: { "Content-Type": "application/json"},
             body: JSON.stringify({ email: email })
