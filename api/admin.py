@@ -75,20 +75,12 @@ class ArticleAdmin(admin.ModelAdmin):
     form = ArticleUploadForm
 
 class VideoAdmin(admin.ModelAdmin):
-    # list_display = (
-    #     "videoUniqueId",
-    #     "thumbnailImageId",
-    #     "videoBrandType",
-    #     "author",
-    #     "title",
-    #     "url",
-    #     "fetchable_url",
-    #     "thumbnailImageUrl",
-    #     "thumbnailImageFetchableUrl",
-    #     "createdTime"
-    # )
+    actions = ["create_videos"]
 
-    form = FileUploadForm
+    def create_videos(self, request, queryset):
+        upload_to_google_drive(request)
+
+    
 
 class ArticleCommentAdmin(admin.ModelAdmin):
     form = ArticleCommentForm

@@ -136,4 +136,8 @@ def fixing_object(i, alter_file):
         
 
 if __name__ == "__main__":
-    fixing_object("1Qq7GzJp7cNcyxqOYCwBP2H-xPaMWi0PA", "hqdefault.jpg")
+    video = Video.objects.get(id=39)
+    video.videoBrandType = "Apple"
+    video.save(update_fields=["videoBrandType"])
+
+    print("Update object successfully.")

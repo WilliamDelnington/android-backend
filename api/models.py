@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from .storage import S3MediaStorage
@@ -235,6 +236,10 @@ class TemporaryUser(models.Model):
    username = models.CharField(max_length=100, unique=True)
    displayname = models.CharField(max_length=100, null=True)
    profileImage = models.FileField(storage=S3MediaStorage(), upload_to="Uploads/", blank=True)
+
+   def clean(self):
+      if self.username == self.displayname:
+         raise ValidationError("The username must not be the same as the display name.")
 
 class TemporarySearchHistory(models.Model):
    user = models.ForeignKey(TemporaryUser, on_delete=models.CASCADE, related_name='search_histories')

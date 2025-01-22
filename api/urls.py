@@ -343,13 +343,18 @@ urlpatterns = [
         ),
     path(
         'login',
-        views.login,
+        views.LoginAPIView.as_view(),
         name='login'
         ),
     path(
         'signup',
-        views.signup,
+        views.RegisterAPIView.as_view(),
         name='signup'
+        ),
+    path(
+        "logout",
+        views.LogoutAPIView.as_view(),
+        name="logout"
         ),
     path(
         'resetPassword',
@@ -375,7 +380,17 @@ urlpatterns = [
         'profile',
         views.profile,
         name='profile'
-        )
+        ),
+    path(
+        'password-reset', 
+        views.PasswordResetRequestView.as_view(), 
+        name='password_reset_request'
+        ),
+    path(
+        'reset-password/<uidb64>/<token>/', 
+        views.PasswordResetConfirmationView.as_view(), 
+        name='password_reset_confirm'
+        ),
 ]
 
 handler404 = views.get_not_found_page

@@ -6,6 +6,7 @@ import Login from './Auth/Login';
 import Main from './Main/Main';
 import Video from './Media/Video';
 import Article from './Media/Article';
+import ForgotPassword from './Auth/ForgotPassword';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/article/:articleId" element={<Article />} />
         <Route path="/signup" element={<Signup />}/>
         <Route path="/login" element={<Login />} />
+        <Route path="/forgotPassword" element={<ForgotPassword />}/>
       </Routes>
     </Router>
   );

@@ -5,9 +5,12 @@ import {useNavigate} from 'react-router-dom'
 export default function Signup() {
     const [errorMessage, setErrorMessage] = useState("")
     const [username, setUsername] = useState("")
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [retypePassword, setRetypePassword] = useState("")
 
     const publicUrl = "https://android-backend-tech-c52e01da23ae.herokuapp.com/users/temporary"
-    const privateUrl = "http://192.168.56.1:8000/users/temporary"
+    const privateUrl = "http://192.168.56.1:8000/signup"
 
     const navigate = useNavigate()
 
@@ -15,13 +18,20 @@ export default function Signup() {
         setErrorMessage("")
         e.preventDefault()
 
+        if (password !== retypePassword) {
+            setErrorMessage("Password do not match.")
+            return
+        }
+
         fetch(privateUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                username: username
+                username: username,
+                email: email,
+                password: password
             })
         }).then(response => {
             if (response.status < 200 || response.status >= 300) {
@@ -29,11 +39,10 @@ export default function Signup() {
             }
             return response.json()
         }).then(data => {
+            if (data == null) return
             localStorage.setItem("is_authenticated", "true")
             localStorage.setItem("username", username)
-            localStorage.setItem("userId", data.id)
-            console.log(localStorage.getItem("username"))
-            console.log(localStorage.getItem("userId"))
+            console.log(data)
             navigate("/")
         }).catch(error => {
             setErrorMessage(`Error requesting: ${error.message}`)
@@ -51,7 +60,31 @@ export default function Signup() {
                 name="username"
                 placeholder="Your username"
                 value={username}
-                onChange={e => setUsername(e.target.value)}></Form.Control>
+                onChange={e => setUsername(e.target.value)} />
+            </Form.Group>
+            <Form.Group>
+                <Form.Label>Enter your email:</Form.Label>
+                <Form.Control 
+                type='email'
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)} />
+            </Form.Group>
+            <Form.Group>
+                <Form.Label>Enter your password: </Form.Label>
+                <Form.Control 
+                type='password'
+                placeholder='Password'
+                value={password}
+                onChange={e => setPassword(e.target.value)}/>
+            </Form.Group>
+            <Form.Group>
+                <Form.Label>Reenter password: </Form.Label>
+                <Form.Control 
+                type='password'
+                placeholder='password'
+                value={retypePassword}
+                onChange={e => setRetypePassword(e.target.value)}/>
             </Form.Group>
             <Button type="submit" variant='primary'>Sign Up</Button>
         </Form>

@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.core.exceptions import ValidationError
 from .models import *
+from .views import upload_to_google_drive
 import re
 
 def validate_password(value):

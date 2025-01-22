@@ -5,12 +5,20 @@ from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView, PasswordResetCompleteView, PasswordResetDoneView
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib import messages
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.core.mail import send_mail
+from django.contrib.sites.shortcuts import get_current_site
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from .models import Article, Video, ArticleComment, VideoComment, SearchHistory, CustomUser
 from .serializer import *
@@ -266,7 +274,7 @@ class ArticleCommentListCreate(generics.ListCreateAPIView):
         """
         Get all article comment data.
         """
-        response = super().get(request, args, kwargs)
+        response = super().get(request, *args, **kwargs)
 
         data = response.data
 
@@ -412,7 +420,7 @@ class VideoCommentListCreate(generics.ListCreateAPIView):
         """
         Get all video comment objects.
         """
-        response = super().get(request, args, kwargs)
+        response = super().get(request, *args, **kwargs)
 
         data = response.data
 
@@ -1328,7 +1336,7 @@ class TemporaryVideoCommentListCreate(generics.ListCreateAPIView):
         """
         Get all temporary video comments.
         """
-        response = super().get(request, args, kwargs)
+        response = super().get(request, *args, **kwargs)
 
         data = response.data
 
@@ -1476,7 +1484,7 @@ class TemporaryArticleCommentListCreate(generics.ListCreateAPIView):
         """
         Get all article comments.
         """
-        response = super().get(request, args, kwargs)
+        response = super().get(request, *args, **kwargs)
 
         data = response.data
 
@@ -1988,14 +1996,18 @@ class GetArticlesFromTemporaryBookmark(APIView):
     """
     def get(self, request, *args, **kwargs):
         user = request.query_params.get("user")
+        username = request.query_params.get("username")
 
         returned_articles = []
 
-        if not user:
-            return Response({"message": "user id does not specified"}, status=status.HTTP_400_BAD_REQUEST)
+        if not any([user, username]):
+            return Response({"message": "user's id/username does not specified"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            temporaryArticleBookmarks = TemporaryArticleBookmark.objects.filter(user=user)
+            if user:
+                temporaryArticleBookmarks = TemporaryArticleBookmark.objects.filter(user=user)
+            elif username:
+                temporaryArticleBookmarks = TemporaryArticleBookmark.objects.filter(username=username)
             for articleBookmark in temporaryArticleBookmarks:
                 article = Article.objects.get(id=articleBookmark.articleId.id)
                 article_serializer = ArticleSerializer(article)
@@ -2102,14 +2114,18 @@ class GetVideosFromTemporaryBookmark(APIView):
     """
     def get(self, request, *args, **kwargs):
         user = request.query_params.get('user')
+        username = request.query_params.get("username")
 
         returned_videos = []
 
-        if not user:
-            return Response({"message": "user id does not specified"}, status=status.HTTP_400_BAD_REQUEST)
+        if not any[user, username]:
+            return Response({"message": "user's id/username does not specified"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            temporaryVideoBookmarks = TemporaryVideoBookmark.objects.filter(user=user)
+            if user:
+                temporaryVideoBookmarks = TemporaryVideoBookmark.objects.filter(user=user)
+            elif username:
+                temporaryVideoBookmarks = TemporaryVideoBookmark.objects.filter(username=username)
             for videoBookmark in temporaryVideoBookmarks:
                 video = Video.objects.get(id=videoBookmark.videoId.id)
                 video_serializer = VideoSerializer(video)
@@ -2854,6 +2870,107 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
         'action': 'reset_password_complete'
     }
 
+class PasswordResetRequestView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        domain = get_current_site(request).domain
+        protocol = "https" if request.is_secure() else "http"
+        if not email:
+            return Response({"message": "email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            return Response({'error': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        reset_link = f"{protocol}://{domain}/reset-password/{uid}/{token}/"
+
+        # Send the reset link via email
+        send_mail(
+            'Password Reset Request',
+            f'Click the link below to reset your password:\n\n{reset_link}',
+            settings.EMAIL_HOST_USER,
+            [email],
+            fail_silently=False,
+        )
+
+        return Response({'message': 'Password reset link sent'}, status=status.HTTP_200_OK)
+    
+class PasswordResetConfirmationView(APIView):
+    def get(self, request, uidb64, token):
+        # Render an HTML form when the reset link is opened
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = CustomUser.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            return HttpResponse("<h3>Invalid or expired reset link</h3>", status=400)
+
+        if default_token_generator.check_token(user, token):
+            # Render password reset form if the token is valid
+            return render(request, 'password_reset_form.html', {'uidb64': uidb64, 'token': token})
+        else:
+            return HttpResponse("<h3>Invalid or expired reset link</h3>", status=400)
+
+    def post(self, request, uidb64, token):
+        new_password = request.data.get('password')
+
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = CustomUser.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            return Response({'error': 'Invalid reset link'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if default_token_generator.check_token(user, token):
+            user.set_password(new_password)
+            user.save()
+            return Response({'message': 'Password has been reset successfully'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Invalid or expired token'}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+class LoginAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({
+                'token': token.key,
+                'user': {
+                    'email': user.email,
+                    'username': user.username,
+                    'userId': user.userId,
+                }
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+class LogoutAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        request.user.auth_token.delete()
+        return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
+    
+class RegisterAPIView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request, *args, **kwargs):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                "message": "User created successfully",
+                "user": {
+                    "email": user.email,
+                    "username": user.username,
+                }
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 @login_required
 def update_profile(request, *args, **kwargs):
     user = request.user
@@ -2890,7 +3007,6 @@ def get_article_content(url="ggg"):
 
     timenow = datetime.now()
     formatted = timenow.strftime("%Y-%m-%d-%H-%M-%S")
-
     if url.startswith("https://news.samsung.com"):
         container = bs.find("div", {"class": "container"})
         title = container.find("h1", {"class": "title"}).text
