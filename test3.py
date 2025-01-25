@@ -51,4 +51,14 @@ def main():
 def main2(url):
     pyk.save_tiktok(url, True, "video_data.csv", 'chrome')
 
-main2("https://www.tiktok.com/@emobiletech2.4/video/7430534038751939872")
+import smtplib
+import os
+
+EMAIL = "vunhat20032008@gmail.com"
+APP_PASSWORD = "amdu dtym zual gmgt"
+
+server = smtplib.SMTP("smtp.gmail.com", 587)
+server.starttls()
+server.login(EMAIL, APP_PASSWORD)
+server.sendmail(EMAIL, "giahuy.nguyenvu2003@gmail.com", "Test email from Python")
+server.quit()

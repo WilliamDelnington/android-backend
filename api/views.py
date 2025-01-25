@@ -23,7 +23,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Article, Video, ArticleComment, VideoComment, SearchHistory, CustomUser
 from .serializer import *
 from .utils import upload_file, list_all_files, get_specific_file, delete_specific_file
-from .forms import *
+from api.forms import *
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -2301,7 +2301,8 @@ def upload_to_google_drive_with_url(request, *args, **kwargs):
                     image_view_url = f"https://drive.google.com/file/d/{image_file_id}/view" if image_file_id else None
                     image_fetchable_url = f"fetch/{image_file_id}" if image_file_id else None
                     os.remove(video_file_path)
-                    os.remove(image_file_path)
+                    if os.path.exists(image_file_path):
+                        os.remove(image_file_path)
 
                     if video_file_id:
                         message = f"Brand type: {videoBrandType}, title: {videoContent.get('title', '')}, author: {videoContent.get('author', '')}"  

@@ -1,5 +1,6 @@
 {
-    "author": "itechphone",
-    "title": "iPhone test #iphone16pro #phonetest #itechphone #iphone11 #fyp ",
-    "src": "https://www.tiktok.com/@itechphone48/video/7444719661016419615?q=iphone&t=1734529054141"
+    "author": "Karl Conrad",
+    "title": "RATING Every ASUS Laptop in 2024!",
+    "src": "https://www.youtube.com/shorts/JOC-TEtZP_c",
+    "thumbnail_url": "https://i.ytimg.com/vi/JOC-TEtZP_c/hq720_2.jpg?sqp=-oaymwE7CK4FEIIDSFryq4qpAy0IARUAAAAAGAAlAADIQj0AgKJD8AEB-AG2CIACgA-KAgwIABABGHIgQig4MA8=&rs=AOn4CLBuCdnc0qqEpao7Q71pl7El2Rkd4A"
 }
