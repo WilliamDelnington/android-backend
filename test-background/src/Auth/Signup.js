@@ -9,19 +9,15 @@ export default function Signup() {
     const [password, setPassword] = useState("")
     const [retypePassword, setRetypePassword] = useState("")
 
-    const publicUrl = "https://android-backend-tech-c52e01da23ae.herokuapp.com/users/temporary"
+    const publicUrl = "https://android-backend-tech-c52e01da23ae.herokuapp.com/signup"
     const privateUrl = "http://192.168.56.1:8000/signup"
 
     const navigate = useNavigate()
 
     function handleSubmit(e) {
+        let success = true
         setErrorMessage("")
         e.preventDefault()
-
-        if (password !== retypePassword) {
-            setErrorMessage("Password do not match.")
-            return
-        }
 
         fetch(publicUrl, {
             method: 'POST',
@@ -31,11 +27,13 @@ export default function Signup() {
             body: JSON.stringify({
                 username: username,
                 email: email,
-                password: password
+                password: password,
+                confirm_password: retypePassword
             })
         }).then(response => {
             if (response.status < 200 || response.status >= 300) {
                 setErrorMessage(`Error sign up ${username}: ${response.status}`)
+                success = false
             }
             return response.json()
         }).then(data => {
@@ -43,7 +41,7 @@ export default function Signup() {
             localStorage.setItem("is_authenticated", "true")
             localStorage.setItem("username", username)
             console.log(data)
-            navigate("/")
+            if (success) {navigate("/")}
         }).catch(error => {
             setErrorMessage(`Error requesting: ${error.message}`)
         })
@@ -66,6 +64,7 @@ export default function Signup() {
                 <Form.Label>Enter your email:</Form.Label>
                 <Form.Control 
                 type='email'
+                name="email"
                 placeholder="Email"
                 value={email}
                 onChange={e => setEmail(e.target.value)} />
@@ -74,6 +73,7 @@ export default function Signup() {
                 <Form.Label>Enter your password: </Form.Label>
                 <Form.Control 
                 type='password'
+                name="password"
                 placeholder='Password'
                 value={password}
                 onChange={e => setPassword(e.target.value)}/>
@@ -82,6 +82,7 @@ export default function Signup() {
                 <Form.Label>Reenter password: </Form.Label>
                 <Form.Control 
                 type='password'
+                name="confirm_password"
                 placeholder='password'
                 value={retypePassword}
                 onChange={e => setRetypePassword(e.target.value)}/>

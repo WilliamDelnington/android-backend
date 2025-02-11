@@ -7,7 +7,7 @@ export default function Login() {
     const [password, setPassword] = useState("")
     const [email, setEmail] = useState("")
 
-    const publicUrl = "https://android-backend-tech-c52e01da23ae.herokuapp.com/users"
+    const publicUrl = "https://android-backend-tech-c52e01da23ae.herokuapp.com/login"
     const privateUrl = "http://192.168.56.1:8000/login"
 
     const navigate = useNavigate()
@@ -33,6 +33,7 @@ export default function Login() {
             localStorage.setItem("is_authenticated", "true")
             localStorage.setItem("email", email)
             localStorage.setItem("userId", data.id)
+            console.log(data)
             navigate("/")
         }).catch(error => {
             setErrorMessage(`Error: ${error.message}`)

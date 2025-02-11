@@ -365,19 +365,19 @@ def main2(brand, semaphore):
             except Exception as e:
                 print(f"Error getting content in url {url}: {e}")
 
-brands = ["Samsung", "Apple", "Nokia", "Huawei", "Xiaomi", "Micorsoft", "Google", "Asus", "Dell"]
+brands = ["Samsung", "Apple", "Nokia", "Huawei", "Xiaomi", "Google", "Asus", "Dell", "Microsoft"]
 
-max_threads = 2
-semaphore = threading.Semaphore(max_threads)
-threads = []
+# max_threads = 2
+# semaphore = threading.Semaphore(max_threads)
+# threads = []
 
-for brand in brands:
-    thread = threading.Thread(target=main2, args=(brand, semaphore))
-    threads.append(thread)
-    thread.start()
+# for brand in brands:
+#     thread = threading.Thread(target=main2, args=(brand, semaphore))
+#     threads.append(thread)
+#     thread.start()
 
-for thread in threads:
-    thread.join()
+# for thread in threads:
+#     thread.join()
 
 article_type = {}
 

@@ -539,8 +539,18 @@ class VideoCommentList(APIView):
             # If no filters are used, return all objects.
             videoComments = VideoComment.objects.all()
 
-        serializer = VideoCommentSerializer(videoComments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        response_data = []
+
+        for comment in videoComments:
+            user = comment.user
+            username = user.username
+            serializer = VideoCommentSerializer(comment)
+            data = serializer.data
+            data["username"] = username
+
+            response_data.append(data)
+
+        return Response(response_data, status=status.HTTP_200_OK)
     
 class ArticleReactionListCreate(generics.ListCreateAPIView):
 
@@ -1008,7 +1018,7 @@ class VideoBookmarkList(APIView):
         else:
             videoBookmarks = VideoBookmark.objects.all()
 
-        serializer = TemporaryVideoBookmarkSerializer(videoBookmarks, many=True)
+        serializer = VideoBookmarkSerializer(videoBookmarks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, *args, **kwargs):
