@@ -2973,11 +2973,13 @@ class RegisterAPIView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            token, created = Token.objects.get_or_create(user=user)
             return Response({
-                "message": "User created successfully",
+                'token': token.key,
                 "user": {
                     "email": user.email,
                     "username": user.username,
+                    "userId": user.userId
                 }
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
