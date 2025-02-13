@@ -142,7 +142,7 @@ class CustomUserChangeForm(UserChangeForm):
         fields = ('email', 'username', 'is_active', 'is_staff', 'is_superuser')
 
 class ArticleUploadForm(forms.ModelForm):
-    articleId = forms.CharField(
+    articleUniqueId = forms.CharField(
         required=True,
         max_length=150,
         widget=forms.TextInput(attrs={
