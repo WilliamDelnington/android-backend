@@ -46,7 +46,7 @@ class SearchHistory(models.Model):
   
 class Article(models.Model):
    articleUniqueId = models.CharField(max_length=100, unique=True, serialize=False)
-   articleBrandType = models.CharField(default=None, max_length=30, unique=True)
+   articleBrandType = models.CharField(default=None, max_length=30)
    sourceName = models.CharField(max_length=100, null=True)
    author = models.CharField(max_length=200, null=True)
    title = models.TextField(null=True)
